@@ -51,7 +51,7 @@ namespace DuplicatedSlugAnalyzer
 
 			WriteLine("\nQuerying backoffice database to get all duplicated slugs for published entities (this could take a long time)...");
 			var mongodbConnString = guishellAppConfiguration.BackEndStoreConfiguration.ConnectionString;
-			var duplicateSlugFinder = DuplicateSlugsFinderFactory.Create(mongodbConnString);
+			var duplicateSlugFinder = DuplicateSlugsFinder.Create(mongodbConnString);
 			var duplicateSlugsInfos = (await duplicateSlugFinder
 				.GetDuplicateSlugsInfoAsync()
 				.ConfigureAwait(false)).ToArray();

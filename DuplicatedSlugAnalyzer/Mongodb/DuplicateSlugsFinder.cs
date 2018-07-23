@@ -1,20 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using static DuplicatedSlugAnalyzer.Mongodb.MongoDbHelpers;
 
 namespace DuplicatedSlugAnalyzer.Mongodb
 {
 	public class DuplicateSlugsFinder
 	{
+		private const string CollectionName = "wcm.EntitiesPublished";
 		private readonly IMongoCollection<BsonDocument> _publishedEntitiesCollection;
 
-		public DuplicateSlugsFinder(IMongoCollection<BsonDocument> publishedEntitiesCollection)
+		public static DuplicateSlugsFinder Create(string connString)
 		{
-			_publishedEntitiesCollection = publishedEntitiesCollection 
-			                               ?? throw new ArgumentNullException(nameof(publishedEntitiesCollection));
+			var database = GetDatabaseFromConnString(connString);
+			var collection = database.GetCollection<BsonDocument>(CollectionName);
+			return new DuplicateSlugsFinder(collection);
+		}
+
+		private DuplicateSlugsFinder(IMongoCollection<BsonDocument> publishedEntitiesCollection)
+		{
+			_publishedEntitiesCollection = publishedEntitiesCollection;
 		}
 
 		public async Task<IEnumerable<SlugReservationKeyInfo>> GetDuplicateSlugsInfoAsync()
