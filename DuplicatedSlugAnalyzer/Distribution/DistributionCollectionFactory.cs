@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using LanguageExt;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using static DuplicatedSlugAnalyzer.Mongodb.MongoDbHelpers;
@@ -32,24 +33,33 @@ namespace DuplicatedSlugAnalyzer.Distribution
 			_entityCodeToDistributionCode = entityCodeToDistributionCode;
 		}
 
-		public IMongoCollection<BsonDocument> GetCollection(
+		public Option<IMongoCollection<BsonDocument>> GetCollection(
 			string culture, 
 			string entityType, 
 			string entityCode)
 		{
+			var collectionName = BuildCollectionName(
+				culture, 
+				entityType, 
+				entityCode);
+
+
 			throw new NotImplementedException();
 		}
 
-		private string BuildCollectionName(
+		private Option<string> BuildCollectionName(
 			string culture,
 			string entityType,
 			string entityCode)
 		{
 			var resourceName = GetDistributionResourceName(entityType, entityCode);
-			return $"{culture}{CollectionNameSeparator}{resourceName}";
+
+			return resourceName.Match(
+				rn => $"{culture}{CollectionNameSeparator}{rn}", 
+				() => Option<string>.None);
 		}
 
-		private string GetDistributionResourceName(
+		private Option<string> GetDistributionResourceName(
 			string entityType,
 			string entityCode)
 		{
@@ -74,7 +84,7 @@ namespace DuplicatedSlugAnalyzer.Distribution
 					return LookupDistributionCode(entityCode);
 
 				case "selection":
-					throw new NotSupportedException($"Entity type not directly mapped to a distribution resource: '{entityType}'.");
+					return Option<string>.None;
 
 				default:
 					throw new UnknownEntityTypeException($"Unknown entity type: '{entityType}'.");
