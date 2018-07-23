@@ -1,6 +1,6 @@
 ﻿namespace DuplicatedSlugAnalyzer.Distribution
 {
-	public enum WcmEntityDistributionStatus
+	public enum DistributionStatus
 	{
 		NotPublished = 0,
 		Published = 1,
