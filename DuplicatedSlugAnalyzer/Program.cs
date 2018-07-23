@@ -17,24 +17,29 @@ namespace DuplicatedSlugAnalyzer
 		private const string ApplicationNameConfigKey = "applicationName";
 		private const string GuishellSecretConfigKey = "guishellSecret";
 
-
 		private static void Main(string[] args)
 		{
-			RunAsync().Wait();
+			RunAsync(args).Wait();
 			ReadLine();
 		}
 
-		private static async Task RunAsync()
+		private static async Task RunAsync(string[] args)
 		{
-			var config = GetConfiguration();
+			WriteLine("Reading configuration to get guishell info...");
+
+			var config = GetConfiguration(args);
 
 			var guishellBaseUrl = config[GuishellBaseUrlConfigKey];
 			var applicationName = config[ApplicationNameConfigKey];
 			var guishellSecret = config[GuishellSecretConfigKey];
 
+			WriteLine("Calling guishell to get Forge configuration...");
+
 			var guishellInfo = new GuishellInfo(guishellBaseUrl, applicationName, guishellSecret);
 			var guishellAppConfiguration = await GetGuishellAppConfigurationAsync(guishellInfo)
 				.ConfigureAwait(false);
+
+			WriteLine("Querying backoffice database to get all duplicated slugs for published entities...");
 
 			var mongodbConnString = guishellAppConfiguration.BackEndStoreConfiguration.ConnectionString;
 			var duplicateSlugFinder = DuplicateSlugsFinderFactory.Create(mongodbConnString);
@@ -42,16 +47,22 @@ namespace DuplicatedSlugAnalyzer
 				.GetDuplicateSlugsInfoAsync()
 				.ConfigureAwait(false);
 
+			WriteLine("Preparing JSON report...");
+
 			await CreateJsonReportAsync(
 				duplicateSlugsInfos, 
 				ReportFileName, 
 				ReportDirectoryName).ConfigureAwait(false);
+
+			WriteLine("All done");
 		}
 
-		private static IConfiguration GetConfiguration()
+		private static IConfiguration GetConfiguration(string[] args)
 		{
 			var config = new ConfigurationBuilder()
 				.AddJsonFile(ConfigurationFileName, true, true)
+				.AddEnvironmentVariables()
+				.AddCommandLine(args)
 				.Build();
 
 			return config;
