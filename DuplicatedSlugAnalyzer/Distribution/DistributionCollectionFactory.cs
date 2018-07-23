@@ -10,6 +10,7 @@ namespace DuplicatedSlugAnalyzer.Distribution
 	{
 		private readonly IMongoDatabase _database;
 		private readonly IReadOnlyDictionary<string, string> _entityCodeToDistributionCode;
+		private const string CollectionNameSeparator = "__";
 
 		public static DistributionCollectionFactory Create(
 			string connString, 
@@ -31,9 +32,64 @@ namespace DuplicatedSlugAnalyzer.Distribution
 			_entityCodeToDistributionCode = entityCodeToDistributionCode;
 		}
 
-		public IMongoCollection<BsonDocument> GetCollection()
+		public IMongoCollection<BsonDocument> GetCollection(
+			string culture, 
+			string entityType, 
+			string entityCode)
 		{
 			throw new NotImplementedException();
+		}
+
+		private string BuildCollectionName(
+			string culture,
+			string entityType,
+			string entityCode)
+		{
+			var resourceName = GetDistributionResourceName(entityType, entityCode);
+			return $"{culture}{CollectionNameSeparator}{resourceName}";
+		}
+
+		private string GetDistributionResourceName(
+			string entityType,
+			string entityCode)
+		{
+			switch (entityType.ToLowerInvariant())
+			{
+				case "album":
+					return "albums";
+
+				case "photo":
+					return "photos";
+
+				case "document":
+					return "documents";
+
+				case "story":
+					return "stories";
+
+				case "tag":
+					return "tags";
+
+				case "customentity":
+					return LookupDistributionCode(entityCode);
+
+				case "selection":
+					throw new NotSupportedException($"Entity type not directly mapped to a distribution resource: '{entityType}'.");
+
+				default:
+					throw new UnknownEntityTypeException($"Unknown entity type: '{entityType}'.");
+			}
+		}
+
+		private string LookupDistributionCode(string entityCode)
+		{
+			var distributionCodeFound = _entityCodeToDistributionCode.TryGetValue(
+				entityCode, 
+				out var distributionCode);
+			if(!distributionCodeFound)
+				throw new DistributionCodeNotFoundException($"Unable to find distribution code corresponding to entity code '{entityCode}'.");
+
+			return distributionCode;
 		}
 	}
 }
