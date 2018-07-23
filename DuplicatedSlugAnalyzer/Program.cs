@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DuplicatedSlugAnalyzer.Guishell;
 using DuplicatedSlugAnalyzer.Mongodb;
@@ -20,40 +21,49 @@ namespace DuplicatedSlugAnalyzer
 
 		private static void Main(string[] args)
 		{
-			RunAsync(args).Wait();
+			try
+			{
+				RunAsync(args).Wait();
+			}
+			catch (Exception e)
+			{
+				WriteLine(e);
+			}
+
 			ReadLine();
 		}
 
 		private static async Task RunAsync(string[] args)
 		{
 			WriteLine("Welcome to Webplu Duplicate Slugs Analyzer. Press enter to start.");
+			ReadLine();
 
-			WriteLine("Reading configuration to get guishell info...");
+			WriteLine("\nReading configuration to get guishell info...");
 			var config = GetConfiguration(args);
 			var guishellBaseUrl = config[GuishellBaseUrlConfigKey];
 			var applicationName = config[ApplicationNameConfigKey];
 			var guishellSecret = config[GuishellSecretConfigKey];
 
-			WriteLine("Calling guishell to get Forge configuration...");
+			WriteLine("\nCalling guishell to get Forge configuration...");
 			var guishellInfo = new GuishellInfo(guishellBaseUrl, applicationName, guishellSecret);
 			var guishellAppConfiguration = await GetGuishellAppConfigurationAsync(guishellInfo)
 				.ConfigureAwait(false);
 
-			WriteLine("Querying backoffice database to get all duplicated slugs for published entities...");
+			WriteLine("\nQuerying backoffice database to get all duplicated slugs for published entities (this could take a long time)...");
 			var mongodbConnString = guishellAppConfiguration.BackEndStoreConfiguration.ConnectionString;
 			var duplicateSlugFinder = DuplicateSlugsFinderFactory.Create(mongodbConnString);
 			var duplicateSlugsInfos = (await duplicateSlugFinder
 				.GetDuplicateSlugsInfoAsync()
 				.ConfigureAwait(false)).ToArray();
-			WriteLine($"Found ${duplicateSlugsInfos.Length} duplicated slug reservation keys.");
+			WriteLine($"\nFound {duplicateSlugsInfos.Length} duplicated slug reservation keys.");
 
-			WriteLine($"Preparing JSON report {ReportFileName}. Report will be saved under the folder {ReportDirectoryName} which is located at the same level of the executable file.");
+			WriteLine($"\nPreparing report '{ReportFileName}'. Report will be saved under the folder '{ReportDirectoryName}' which is located at the executable file level.");
 			await CreateJsonReportAsync(
 				duplicateSlugsInfos, 
 				ReportFileName, 
 				ReportDirectoryName).ConfigureAwait(false);
 
-			WriteLine("Execution successfully completed. Press enter to close.");
+			WriteLine("\nExecution successfully completed. Press enter to close.");
 		}
 
 		private static IConfiguration GetConfiguration(string[] args)
