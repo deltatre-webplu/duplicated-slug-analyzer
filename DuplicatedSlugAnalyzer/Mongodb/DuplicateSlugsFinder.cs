@@ -42,7 +42,7 @@ namespace DuplicatedSlugAnalyzer.Mongodb
 
 			var culture = document["_id"]["culture"].AsString;
 			var entityType = document["_id"]["entityType"].AsString;
-			var entityCode = document["_id"]["entityCode"].AsString;
+			var entityCode = document["_id"]["entityCode"].IsBsonNull ? null : document["_id"]["entityCode"].AsString;
 			var slug = document["_id"]["slug"].IsBsonNull ? null : document["_id"]["slug"].AsString;
 
 			var key = new SlugReservationKey(slug, culture, entityType, entityCode);

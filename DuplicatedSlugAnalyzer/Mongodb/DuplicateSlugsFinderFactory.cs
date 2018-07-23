@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using System;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace DuplicatedSlugAnalyzer.Mongodb
@@ -9,6 +10,9 @@ namespace DuplicatedSlugAnalyzer.Mongodb
 
 		public static DuplicateSlugsFinder Create(string connString)
 		{
+			if(string.IsNullOrWhiteSpace(connString))
+				throw new ArgumentException("Mongodb connection string cannot be null or white space.", nameof(connString));
+
 			var mongoUrl = MongoUrl.Create(connString);
 			var databaseName = mongoUrl.DatabaseName;
 
