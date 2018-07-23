@@ -4,6 +4,7 @@ using LanguageExt;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using static DuplicatedSlugAnalyzer.Mongodb.MongoDbHelpers;
+using static LanguageExt.Option<MongoDB.Driver.IMongoCollection<MongoDB.Bson.BsonDocument>>;
 
 namespace DuplicatedSlugAnalyzer.Distribution
 {
@@ -14,7 +15,7 @@ namespace DuplicatedSlugAnalyzer.Distribution
 		private const string CollectionNameSeparator = "__";
 
 		public static DistributionCollectionFactory Create(
-			string connString, 
+			string connString,
 			IReadOnlyDictionary<string, string> entityCodeToDistributionCode)
 		{
 			if (entityCodeToDistributionCode == null)
@@ -26,25 +27,26 @@ namespace DuplicatedSlugAnalyzer.Distribution
 		}
 
 		private DistributionCollectionFactory(
-			IMongoDatabase database, 
+			IMongoDatabase database,
 			IReadOnlyDictionary<string, string> entityCodeToDistributionCode)
 		{
 			_database = database;
 			_entityCodeToDistributionCode = entityCodeToDistributionCode;
 		}
 
-		public Option<IMongoCollection<BsonDocument>> GetCollection(
-			string culture, 
-			string entityType, 
+		public Option<IMongoCollection<BsonDocument>> GetDistributionResourceCollection(
+			string culture,
+			string entityType,
 			string entityCode)
 		{
 			var collectionName = BuildCollectionName(
-				culture, 
-				entityType, 
+				culture,
+				entityType,
 				entityCode);
 
-
-			throw new NotImplementedException();
+			return collectionName.Match(
+				cn => Some(_database.GetCollection<BsonDocument>(cn)),
+				() => None);
 		}
 
 		private Option<string> BuildCollectionName(
@@ -55,7 +57,7 @@ namespace DuplicatedSlugAnalyzer.Distribution
 			var resourceName = GetDistributionResourceName(entityType, entityCode);
 
 			return resourceName.Match(
-				rn => $"{culture}{CollectionNameSeparator}{rn}", 
+				rn => $"{culture}{CollectionNameSeparator}{rn}",
 				() => Option<string>.None);
 		}
 
@@ -94,9 +96,9 @@ namespace DuplicatedSlugAnalyzer.Distribution
 		private string LookupDistributionCode(string entityCode)
 		{
 			var distributionCodeFound = _entityCodeToDistributionCode.TryGetValue(
-				entityCode, 
+				entityCode,
 				out var distributionCode);
-			if(!distributionCodeFound)
+			if (!distributionCodeFound)
 				throw new DistributionCodeNotFoundException($"Unable to find distribution code corresponding to entity code '{entityCode}'.");
 
 			return distributionCode;
