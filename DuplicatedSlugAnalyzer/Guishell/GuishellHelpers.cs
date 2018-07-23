@@ -14,9 +14,6 @@ namespace DuplicatedSlugAnalyzer.Guishell
 		public static async Task<ApplicationConfiguration> GetGuishellAppConfigurationAsync(
 			GuishellInfo info)
 		{
-			if (info == null)
-				throw new ArgumentNullException(nameof(info));
-
 			var uri = BuildAppConfigurationUri(
 				info.GuishellBaseUrl, 
 				info.ApplicationName);

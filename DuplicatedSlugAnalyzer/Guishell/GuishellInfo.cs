@@ -2,7 +2,7 @@
 
 namespace DuplicatedSlugAnalyzer.Guishell
 {
-	public class GuishellInfo
+	public struct GuishellInfo
 	{
 		public string GuishellBaseUrl { get; }
 		public string ApplicationName { get; }
