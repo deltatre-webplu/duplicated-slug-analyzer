@@ -11,7 +11,7 @@ namespace DuplicatedSlugAnalyzer.Guishell
 		private const string JsonMimeType = "application/json";
 		private const string AuthorizationHeaderName = "Authorization";
 		
-		public static async Task<ApplicationConfiguration> GetConfigurationAsync(
+		public static async Task<ApplicationConfiguration> GetAppConfigurationAsync(
 			GuishellApplicationInfo applicationInfo)
 		{
 			if (applicationInfo == null)

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using DuplicatedSlugAnalyzer.Guishell;
 using DuplicatedSlugAnalyzer.Mongodb;
 using static System.Console;
 using static DuplicatedSlugAnalyzer.Guishell.GuishellHelpers;
@@ -11,6 +10,7 @@ namespace DuplicatedSlugAnalyzer
 {
 	public class Program
 	{
+		private const string ConfigurationFileName = "appsettings.json";
 		private const string ReportFileName = "report.json";
 		private const string ReportDirectoryName = "Reports";
 		private const int MinimumNumberOfCommandLineArgumentsExpected = 3;
@@ -23,9 +23,9 @@ namespace DuplicatedSlugAnalyzer
 
 		private static async Task RunAsync(string[] args)
 		{
-			var config = await GetConfigurationAsync(null).ConfigureAwait(false);
+			var appConfiguration = await GetAppConfigurationAsync(null).ConfigureAwait(false);
 
-			var connString = config.BackEndStoreConfiguration.ConnectionString;
+			var connString = appConfiguration.BackEndStoreConfiguration.ConnectionString;
 			var duplicateSlugFinder = DuplicateSlugsFinderFactory.Create(connString);
 
 			var docs = await duplicateSlugFinder.GetDuplicateSlugsInfoAsync().ConfigureAwait(false);
