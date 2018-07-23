@@ -9,11 +9,12 @@ namespace DuplicatedSlugAnalyzer.Mongodb
 {
 	public class DuplicateSlugsFinder
 	{
-		private readonly IMongoCollection<BsonDocument> _publishedEntities;
+		private readonly IMongoCollection<BsonDocument> _publishedEntitiesCollection;
 
-		public DuplicateSlugsFinder(IMongoCollection<BsonDocument> publishedEntities)
+		public DuplicateSlugsFinder(IMongoCollection<BsonDocument> publishedEntitiesCollection)
 		{
-			_publishedEntities = publishedEntities ?? throw new ArgumentNullException(nameof(publishedEntities));
+			_publishedEntitiesCollection = publishedEntitiesCollection 
+			                               ?? throw new ArgumentNullException(nameof(publishedEntitiesCollection));
 		}
 
 		public async Task<IEnumerable<SlugReservationKeyInfo>> GetDuplicateSlugsInfoAsync()
@@ -25,7 +26,7 @@ namespace DuplicatedSlugAnalyzer.Mongodb
 			var groupDocument = BuildGroupDocument();
 			var matchDocument = BuildMatchDocument();
 
-			var documents = await _publishedEntities
+			var documents = await _publishedEntitiesCollection
 				.Aggregate(options)
 				.Group(groupDocument)
 				.Match(matchDocument)
