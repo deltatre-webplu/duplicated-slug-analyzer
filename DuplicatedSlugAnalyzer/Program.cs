@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Deltatre.Utils.Extensions.Dictionary;
 using DuplicatedSlugAnalyzer.Guishell;
 using DuplicatedSlugAnalyzer.Mongodb;
 using Microsoft.Extensions.Configuration;
@@ -76,5 +79,13 @@ namespace DuplicatedSlugAnalyzer
 
 			return config;
 		}
+
+		private static ReadOnlyDictionary<string, string> GetEntityCodeToDistributionCodeMap(
+			IEnumerable<CustomEntity> customEntities) => 
+			customEntities
+				.ToDictionary(
+					ce => ce.Code, 
+					ce => ce.DistributionCode)
+				.AsReadOnly();
 	}
 }
