@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using DuplicatedSlugAnalyzer.Guishell;
 using DuplicatedSlugAnalyzer.Mongodb;
+using Microsoft.Extensions.Configuration;
 using static System.Console;
 using static DuplicatedSlugAnalyzer.Guishell.GuishellHelpers;
 using static DuplicatedSlugAnalyzer.Report.ReportHelpers;
@@ -13,43 +13,48 @@ namespace DuplicatedSlugAnalyzer
 		private const string ConfigurationFileName = "appsettings.json";
 		private const string ReportFileName = "report.json";
 		private const string ReportDirectoryName = "Reports";
-		private const int MinimumNumberOfCommandLineArgumentsExpected = 3;
+		private const string GuishellBaseUrlConfigKey = "guishellBaseUrl";
+		private const string ApplicationNameConfigKey = "applicationName";
+		private const string GuishellSecretConfigKey = "guishellSecret";
+
 
 		private static void Main(string[] args)
 		{
-			RunAsync(args).Wait();
+			RunAsync().Wait();
 			ReadLine();
 		}
 
-		private static async Task RunAsync(string[] args)
+		private static async Task RunAsync()
 		{
-			var appConfiguration = await GetAppConfigurationAsync(null).ConfigureAwait(false);
+			var config = GetConfiguration();
 
-			var connString = appConfiguration.BackEndStoreConfiguration.ConnectionString;
-			var duplicateSlugFinder = DuplicateSlugsFinderFactory.Create(connString);
+			var guishellBaseUrl = config[GuishellBaseUrlConfigKey];
+			var applicationName = config[ApplicationNameConfigKey];
+			var guishellSecret = config[GuishellSecretConfigKey];
 
-			var docs = await duplicateSlugFinder.GetDuplicateSlugsInfoAsync().ConfigureAwait(false);
+			var guishellInfo = new GuishellInfo(guishellBaseUrl, applicationName, guishellSecret);
+			var guishellAppConfiguration = await GetGuishellAppConfigurationAsync(guishellInfo)
+				.ConfigureAwait(false);
 
-			await CreateJsonReportAsync(docs, ReportFileName, ReportDirectoryName).ConfigureAwait(false);
+			var mongodbConnString = guishellAppConfiguration.BackEndStoreConfiguration.ConnectionString;
+			var duplicateSlugFinder = DuplicateSlugsFinderFactory.Create(mongodbConnString);
+			var duplicateSlugsInfos = await duplicateSlugFinder
+				.GetDuplicateSlugsInfoAsync()
+				.ConfigureAwait(false);
+
+			await CreateJsonReportAsync(
+				duplicateSlugsInfos, 
+				ReportFileName, 
+				ReportDirectoryName).ConfigureAwait(false);
 		}
 
-		private static (string guishellBaseUrl, string applicationName, string guishellSecret) 
-			ExtractGuishellDataFromCommandLineArgs(IReadOnlyList<string> args)
+		private static IConfiguration GetConfiguration()
 		{
-			if(args.Count == 0)
-				throw new ArgumentException(
-					"No command line arguments provided. Unable to proceed.", 
-					nameof(args));
+			var config = new ConfigurationBuilder()
+				.AddJsonFile(ConfigurationFileName, true, true)
+				.Build();
 
-			if(args.Count < MinimumNumberOfCommandLineArgumentsExpected)
-				throw new InvalidOperationException(
-					$"Invalid number of command line arguments provided. You should provide at least {MinimumNumberOfCommandLineArgumentsExpected} arguments for guishell data. Unable to proceed.");
-
-			var guishellBaseUrl = args[0];
-			var applicationName = args[1];
-			var guishellSecret = args[2];
-
-			return (guishellBaseUrl, applicationName, guishellSecret);
+			return config;
 		}
 	}
 }

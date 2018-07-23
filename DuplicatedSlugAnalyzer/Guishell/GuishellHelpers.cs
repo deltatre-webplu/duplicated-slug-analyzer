@@ -11,17 +11,17 @@ namespace DuplicatedSlugAnalyzer.Guishell
 		private const string JsonMimeType = "application/json";
 		private const string AuthorizationHeaderName = "Authorization";
 		
-		public static async Task<ApplicationConfiguration> GetAppConfigurationAsync(
-			GuishellApplicationInfo applicationInfo)
+		public static async Task<ApplicationConfiguration> GetGuishellAppConfigurationAsync(
+			GuishellInfo info)
 		{
-			if (applicationInfo == null)
-				throw new ArgumentNullException(nameof(applicationInfo));
+			if (info == null)
+				throw new ArgumentNullException(nameof(info));
 
 			var uri = BuildAppConfigurationUri(
-				applicationInfo.GuishellBaseUrl, 
-				applicationInfo.ApplicationName);
+				info.GuishellBaseUrl, 
+				info.ApplicationName);
 
-			var authorizationHeaderValue = BuildAuthorizationHeaderValue(applicationInfo.GuishellSecret);
+			var authorizationHeaderValue = BuildAuthorizationHeaderValue(info.GuishellSecret);
 
 			using (var client = new HttpClient())
 			{
