@@ -45,7 +45,14 @@ namespace DuplicatedSlugAnalyzer.Distribution
 				entityCode);
 
 			return collectionName.Match(
-				cn => Some(_database.GetCollection<BsonDocument>(cn)),
+				cn => Some(
+					_database.GetCollection<BsonDocument>(
+						cn, new MongoCollectionSettings
+						{
+							GuidRepresentation = GuidRepresentation.CSharpLegacy
+						}
+					)
+				),
 				() => None);
 		}
 

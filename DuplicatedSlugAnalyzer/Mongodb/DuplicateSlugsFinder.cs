@@ -15,7 +15,14 @@ namespace DuplicatedSlugAnalyzer.Mongodb
 		public static DuplicateSlugsFinder Create(string connString)
 		{
 			var database = GetDatabaseFromConnString(connString);
-			var collection = database.GetCollection<BsonDocument>(CollectionName);
+
+			var collection = database.GetCollection<BsonDocument>(
+				CollectionName, 
+				new MongoCollectionSettings
+				{
+					GuidRepresentation = GuidRepresentation.CSharpLegacy
+				});
+
 			return new DuplicateSlugsFinder(collection);
 		}
 

@@ -26,21 +26,21 @@ namespace DuplicatedSlugAnalyzer.Distribution
 					wcmEntity.EntityType,
 					wcmEntity.EntityCode);
 
-			if (collection.IsNone)
-				return DistributionStatus.Unknown;
+			var distributionStatus = await collection.MatchAsync(
+				async c => await IsTranslationInCollectionAsync(wcmEntity.TranslationId, c).ConfigureAwait(false)
+					? DistributionStatus.Published
+					: DistributionStatus.NotPublished,
+				() => DistributionStatus.Unknown).ConfigureAwait(false);
 
-
-			
-
-			throw new NotImplementedException();
+			return distributionStatus;
 		}
 
 		private static async Task<bool> IsTranslationInCollectionAsync(
 			Guid translationId, 
-			IMongoCollection<BsonDocument> collection)
-		{
-			collection.Find(d => d["_translationId"] == translationId);
-			throw new NotImplementedException();
-		}
+			IMongoCollection<BsonDocument> collection) => 
+				await collection
+					.Find(d => d["_translationId"] == translationId)
+					.AnyAsync()
+					.ConfigureAwait(false);
 	}
 }
