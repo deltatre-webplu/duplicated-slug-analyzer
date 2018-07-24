@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using DuplicatedSlugAnalyzer.Forge;
 using Newtonsoft.Json;
-using static DuplicatedSlugAnalyzer.Helpers.EnvironmentHelpers;
+using static DuplicatedSlugAnalyzer.Utils.EnvironmentHelpers;
 using static System.IO.Path;
 
 namespace DuplicatedSlugAnalyzer.Report
