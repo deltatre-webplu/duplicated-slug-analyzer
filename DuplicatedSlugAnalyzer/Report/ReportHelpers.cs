@@ -1,53 +1,47 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using DuplicatedSlugAnalyzer.Distribution;
 using DuplicatedSlugAnalyzer.Forge;
-using Newtonsoft.Json;
-using static DuplicatedSlugAnalyzer.Helpers.EnvironmentHelpers;
-using static System.IO.Path;
 
 namespace DuplicatedSlugAnalyzer.Report
 {
 	public static class ReportHelpers
 	{
-		public static string GetReportDirectoryPath(string reportDirectoryName)
+		public static async Task<DuplicateSlugReport> CreateReportAsync(
+			DuplicateSlugInfo info,
+			PublishedEntityFinder finder)
 		{
-			if (string.IsNullOrWhiteSpace(reportDirectoryName))
-				throw new ArgumentException($"Parameter '{nameof(reportDirectoryName)}' cannot be null or white space.", nameof(reportDirectoryName));
+			if (info == null)
+				throw new ArgumentNullException(nameof(info));
 
-			return Combine(GetRunningAssemblyDirectoryPath(), reportDirectoryName);
+			if (finder == null)
+				throw new ArgumentNullException(nameof(finder));
+
+			var publishedEntityIdentifier = await finder
+				.FindPublishedEntityAsync(info.Key)
+				.ConfigureAwait(false);
+
+			return publishedEntityIdentifier.Match(
+				identifier =>
+					{
+						Func<EntityIdentifier, ForgeEntity> projector = x => new ForgeEntity(x, x == identifier);
+						return ToReport(info, projector);
+					},
+				() =>
+					{
+						Func<EntityIdentifier, ForgeEntity> projector = x => new ForgeEntity(x, false);
+						return ToReport(info, projector);
+					}
+			);
 		}
 
-		public static string GetReportFilePath(string reportFileName, string reportDirectoryName)
+		private static DuplicateSlugReport ToReport(
+			DuplicateSlugInfo info, 
+			Func<EntityIdentifier, ForgeEntity> projector)
 		{
-			if (string.IsNullOrWhiteSpace(reportFileName))
-				throw new ArgumentException($"Parameter '{nameof(reportFileName)}' cannot be null or white space.", nameof(reportFileName));
-
-			return Combine(GetReportDirectoryPath(reportDirectoryName), reportFileName);
+			var forgeEntities = info.EntityIdentifiers.Select(projector).ToArray();
+			return new DuplicateSlugReport(info.Key, info.NumberOfEntities, forgeEntities);
 		}
-
-		public static async Task CreateJsonReportAsync(
-			IEnumerable<DuplicateSlugInfo> duplicateSlugsInfos, 
-			string reportFileName, 
-			string reportDirectoryName)
-		{
-			if (duplicateSlugsInfos == null)
-				throw new ArgumentNullException(nameof(duplicateSlugsInfos));
-
-			var reportFilePath = GetReportFilePath(reportFileName, reportDirectoryName);
-			EnsureReportDirectoryExists(reportFilePath);
-
-			var settings = new JsonSerializerSettings()
-			{
-				Formatting = Formatting.Indented
-			};
-			var json = JsonConvert.SerializeObject(duplicateSlugsInfos, settings);
-
-			await File.WriteAllTextAsync(reportFilePath, json).ConfigureAwait(false);
-		}
-
-		private static void EnsureReportDirectoryExists(string reportFilePath) => 
-			CreateDirectoryIfNotExisting(GetDirectoryName(reportFilePath));
 	}
 }

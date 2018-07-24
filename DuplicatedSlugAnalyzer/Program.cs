@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 using Deltatre.Utils.Extensions.Dictionary;
 using DuplicatedSlugAnalyzer.Forge;
 using DuplicatedSlugAnalyzer.Guishell;
+using DuplicatedSlugAnalyzer.Report;
 using Microsoft.Extensions.Configuration;
 using static System.Console;
 using static DuplicatedSlugAnalyzer.Guishell.GuishellHelpers;
-using static DuplicatedSlugAnalyzer.Report.ReportHelpers;
+using static DuplicatedSlugAnalyzer.Report.JsonHelpers;
 
 namespace DuplicatedSlugAnalyzer
 {
@@ -87,5 +88,10 @@ namespace DuplicatedSlugAnalyzer
 					ce => ce.Code, 
 					ce => ce.DistributionCode)
 				.AsReadOnly();
+
+		private static IEnumerable<DuplicateSlugReport> MapToReports()
+		{
+			throw new NotImplementedException();
+		}
 	}
 }
