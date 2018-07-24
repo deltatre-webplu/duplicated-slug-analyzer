@@ -36,8 +36,10 @@ namespace DuplicatedSlugAnalyzer.Distribution
 			IMongoCollection<BsonDocument> collection, 
 			string id)
 		{
+			var filter = Builders<BsonDocument>.Filter.Eq("_id", BsonValue.Create(id));
+
 			var document = await collection
-				.Find(d => d["_id"] == id)
+				.Find(filter)
 				.FirstOrDefaultAsync()
 				.ConfigureAwait(false);
 
