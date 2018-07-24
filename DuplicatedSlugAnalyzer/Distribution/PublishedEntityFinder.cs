@@ -9,9 +9,9 @@ namespace DuplicatedSlugAnalyzer.Distribution
 {
 	public class PublishedEntityFinder
 	{
-		private readonly DistributionCollectionFactory _collectionFactory;
+		private readonly IDistributionCollectionFactory _collectionFactory;
 
-		public PublishedEntityFinder(DistributionCollectionFactory factory)
+		public PublishedEntityFinder(IDistributionCollectionFactory factory)
 		{
 			_collectionFactory = factory ?? throw new ArgumentNullException(nameof(factory));
 		}
