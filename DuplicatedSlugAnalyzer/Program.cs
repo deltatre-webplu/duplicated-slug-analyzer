@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using static System.Console;
 using static DuplicatedSlugAnalyzer.Guishell.GuishellHelpers;
 using static DuplicatedSlugAnalyzer.Report.JsonHelpers;
+using Deltatre.Utils.Extensions.Enumerable;
 
 namespace DuplicatedSlugAnalyzer
 {
@@ -89,7 +90,13 @@ namespace DuplicatedSlugAnalyzer
 					ce => ce.DistributionCode)
 				.AsReadOnly();
 
-		private static IEnumerable<DuplicateSlugReport> MapToReports()
+		private static IEnumerable<DuplicateSlugReport> MapToReports(
+			IEnumerable<DuplicateSlugInfo> infos)
+		{
+			throw new NotImplementedException();
+		}
+
+		private static IEnumerable<DuplicateSlugReport> ProcessBatch(IEnumerable<DuplicateSlugInfo> batch)
 		{
 			throw new NotImplementedException();
 		}
