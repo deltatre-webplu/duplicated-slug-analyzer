@@ -6,15 +6,14 @@ using Deltatre.Utils.Extensions.Enumerable;
 using DuplicatedSlugAnalyzer.Distribution;
 using DuplicatedSlugAnalyzer.Forge;
 using DuplicatedSlugAnalyzer.Guishell;
-using DuplicatedSlugAnalyzer.Mongodb;
 using DuplicatedSlugAnalyzer.Report;
 using Microsoft.Extensions.Configuration;
 using static System.Console;
 using static DuplicatedSlugAnalyzer.Guishell.GuishellHelpers;
 using static DuplicatedSlugAnalyzer.Report.JsonHelpers;
 using static DuplicatedSlugAnalyzer.Report.ReportHelpers;
-using static DuplicatedSlugAnalyzer.Utils.MappingHelpers;
 using static DuplicatedSlugAnalyzer.Constants;
+using static DuplicatedSlugAnalyzer.Utils.Builders;
 
 namespace DuplicatedSlugAnalyzer
 {
@@ -52,8 +51,7 @@ namespace DuplicatedSlugAnalyzer
 
 			var mongodbFactory = CreateMongodbFactory(guishellAppConfiguration);
 			var duplicateSlugFinder = new DuplicateSlugsFinder(mongodbFactory.PublishedEntitiesCollection);
-			var entityCodeToDistributionCode =
-				GetEntityCodeToDistributionCodeMap(guishellAppConfiguration.CustomEntitiesConfiguration.Definitions);
+			var entityCodeToDistributionCode = CreateEntityCodeToDistributionCodeMap(guishellAppConfiguration);
 			var distributionCollectionFactory = new DistributionCollectionFactory(
 				mongodbFactory.DistributionDatabase, 
 				entityCodeToDistributionCode);
@@ -88,13 +86,6 @@ namespace DuplicatedSlugAnalyzer
 				.Build();
 
 			return config;
-		}
-
-		private static MongodbFactory CreateMongodbFactory(ApplicationConfiguration configuration)
-		{
-			var backendDbConnString = configuration.BackEndStoreConfiguration.ConnectionString;
-			var distributionDbConnString = configuration.DistributionStoreConfiguration.ConnectionString;
-			return new MongodbFactory(backendDbConnString, distributionDbConnString);
 		}
 
 		private static async Task<IEnumerable<DuplicateSlugReport>> CreateDuplicateSlugReportsAsync(
