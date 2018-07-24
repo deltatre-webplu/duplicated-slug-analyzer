@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DuplicatedSlugAnalyzer.Mongodb;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using static DuplicatedSlugAnalyzer.Mongodb.MongoDbHelpers;
 
-namespace DuplicatedSlugAnalyzer.Mongodb
+namespace DuplicatedSlugAnalyzer.Forge
 {
 	public class DuplicateSlugsFinder
 	{
@@ -14,7 +14,7 @@ namespace DuplicatedSlugAnalyzer.Mongodb
 
 		public static DuplicateSlugsFinder Create(string connString)
 		{
-			var database = GetDatabaseFromConnString(connString);
+			var database = MongoDbHelpers.GetDatabaseFromConnString(connString);
 
 			var collection = database.GetCollection<BsonDocument>(
 				CollectionName, 
@@ -31,7 +31,7 @@ namespace DuplicatedSlugAnalyzer.Mongodb
 			_publishedEntitiesCollection = publishedEntitiesCollection;
 		}
 
-		public async Task<IEnumerable<SlugReservationKeyInfo>> GetDuplicateSlugsInfoAsync()
+		public async Task<IEnumerable<DuplicateSlugInfo>> GetDuplicateSlugsInfoAsync()
 		{
 			var options = new AggregateOptions
 			{
@@ -51,7 +51,7 @@ namespace DuplicatedSlugAnalyzer.Mongodb
 			return result;
 		}
 
-		private static SlugReservationKeyInfo ToSlugReservationKeyInfo(BsonDocument document)
+		private static DuplicateSlugInfo ToSlugReservationKeyInfo(BsonDocument document)
 		{
 			var numberOfEntities = document["count"].AsInt32;
 
@@ -64,7 +64,7 @@ namespace DuplicatedSlugAnalyzer.Mongodb
 
 			var identifiers = document["identifiers"].AsBsonArray.Select(d => ToEntityIdentifier(d.AsBsonDocument)).ToArray();
 
-			return new SlugReservationKeyInfo(key, numberOfEntities, identifiers);
+			return new DuplicateSlugInfo(key, numberOfEntities, identifiers);
 		}
 
 		private static EntityIdentifier ToEntityIdentifier(BsonDocument document)

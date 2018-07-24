@@ -1,4 +1,4 @@
-﻿namespace DuplicatedSlugAnalyzer.Mongodb
+﻿namespace DuplicatedSlugAnalyzer.Forge
 {
 	public struct SlugReservationKey
 	{

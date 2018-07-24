@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using DuplicatedSlugAnalyzer.Mongodb;
+using DuplicatedSlugAnalyzer.Forge;
 using Newtonsoft.Json;
 using static DuplicatedSlugAnalyzer.Helpers.EnvironmentHelpers;
 using static System.IO.Path;
@@ -28,7 +28,7 @@ namespace DuplicatedSlugAnalyzer.Report
 		}
 
 		public static async Task CreateJsonReportAsync(
-			IEnumerable<SlugReservationKeyInfo> duplicateSlugsInfos, 
+			IEnumerable<DuplicateSlugInfo> duplicateSlugsInfos, 
 			string reportFileName, 
 			string reportDirectoryName)
 		{

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using DuplicatedSlugAnalyzer.Mongodb;
+using DuplicatedSlugAnalyzer.Forge;
 using LanguageExt;
 using MongoDB.Bson;
 using MongoDB.Driver;

@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
 
-namespace DuplicatedSlugAnalyzer.Mongodb
+namespace DuplicatedSlugAnalyzer.Forge
 {
-	public class SlugReservationKeyInfo
+	public class DuplicateSlugInfo
 	{
 		public SlugReservationKey Key { get; }
 		public int NumberOfEntities { get; }
 		public IEnumerable<EntityIdentifier> EntityIdentifiers { get; }
 
-		public SlugReservationKeyInfo(
+		public DuplicateSlugInfo(
 			SlugReservationKey key, 
 			int numberOfEntities, 
 			IEnumerable<EntityIdentifier> entityIdentifiers)
