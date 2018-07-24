@@ -14,19 +14,12 @@ using static DuplicatedSlugAnalyzer.Guishell.GuishellHelpers;
 using static DuplicatedSlugAnalyzer.Report.JsonHelpers;
 using static DuplicatedSlugAnalyzer.Report.ReportHelpers;
 using static DuplicatedSlugAnalyzer.Utils.MappingHelpers;
+using static DuplicatedSlugAnalyzer.Constants;
 
 namespace DuplicatedSlugAnalyzer
 {
 	public class Program
 	{
-		private const string ConfigurationFileName = "appsettings.json";
-		private const string ReportFileName = "report.json";
-		private const string ReportDirectoryName = "Reports";
-		private const string GuishellBaseUrlConfigKey = "guishellBaseUrl";
-		private const string ApplicationNameConfigKey = "applicationName";
-		private const string GuishellSecretConfigKey = "guishellSecret";
-		private const int BatchSize = 20;
-
 		private static void Main(string[] args)
 		{
 			try
