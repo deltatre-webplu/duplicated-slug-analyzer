@@ -18,10 +18,8 @@ namespace DuplicatedSlugAnalyzer.Distribution
 
 		public async Task<Option<EntityIdentifier>> FindPublishedEntityAsync(SlugReservationKey key)
 		{
-			var collection = _collectionFactory.GetDistributionResourceCollection(
-				key.Culture, 
-				key.EntityType,
-				key.EntityCode);
+			var distributionResource = new DistributionResource(key.EntityType, key.EntityCode, key.Culture);
+			var collection = _collectionFactory.GetDistributionResourceCollection(distributionResource);
 
 			var publishedDocument = await collection.MatchAsync(
 				async c => await GetPublishedDocumentByIdAsync(c, key.Slug).ConfigureAwait(false),

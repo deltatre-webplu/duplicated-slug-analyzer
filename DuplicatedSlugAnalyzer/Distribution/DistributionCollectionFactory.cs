@@ -7,7 +7,7 @@ using static LanguageExt.Option<MongoDB.Driver.IMongoCollection<MongoDB.Bson.Bso
 
 namespace DuplicatedSlugAnalyzer.Distribution
 {
-	public class DistributionCollectionFactory
+	public class DistributionCollectionFactory : IDistributionCollectionFactory
 	{
 		private readonly IMongoDatabase _distributionDatabase;
 		private readonly IReadOnlyDictionary<string, string> _entityCodeToDistributionCode;
@@ -24,14 +24,9 @@ namespace DuplicatedSlugAnalyzer.Distribution
 		}
 
 		public Option<IMongoCollection<BsonDocument>> GetDistributionResourceCollection(
-			string culture,
-			string entityType,
-			string entityCode)
+			DistributionResource resource)
 		{
-			var collectionName = BuildCollectionName(
-				culture,
-				entityType,
-				entityCode);
+			var collectionName = BuildCollectionName(resource);
 
 			return collectionName.Match(
 				cn => Some(
@@ -45,15 +40,14 @@ namespace DuplicatedSlugAnalyzer.Distribution
 				() => None);
 		}
 
-		private Option<string> BuildCollectionName(
-			string culture,
-			string entityType,
-			string entityCode)
+		private Option<string> BuildCollectionName(DistributionResource distributionResource)
 		{
-			var resourceName = GetDistributionResourceName(entityType, entityCode);
+			var resourceName = GetDistributionResourceName(
+				distributionResource.EntityType,
+				distributionResource.EntityCode);
 
 			return resourceName.Match(
-				rn => $"{culture}{CollectionNameSeparator}{rn}",
+				rn => $"{distributionResource.Culture}{CollectionNameSeparator}{rn}",
 				() => Option<string>.None);
 		}
 

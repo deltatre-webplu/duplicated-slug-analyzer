@@ -51,7 +51,7 @@ namespace DuplicatedSlugAnalyzer.Forge
 			return new DuplicateSlugInfo(key, numberOfEntities, identifiers);
 		}
 
-		private static EntityIdentifier ToEntityIdentifier(BsonDocument document)
+		private static EntityIdentifier ToEntityIdentifier(BsonValue document)
 		{
 			var entityId = document["entityId"].AsGuid;
 			var translationId = document["translationId"].AsGuid;
