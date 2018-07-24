@@ -28,12 +28,12 @@ namespace DuplicatedSlugAnalyzer.Report
 		}
 
 		public static async Task CreateJsonReportAsync(
-			IEnumerable<DuplicateSlugInfo> duplicateSlugsInfos, 
+			IEnumerable<DuplicateSlugReport> duplicateSlugsReports, 
 			string reportFileName, 
 			string reportDirectoryName)
 		{
-			if (duplicateSlugsInfos == null)
-				throw new ArgumentNullException(nameof(duplicateSlugsInfos));
+			if (duplicateSlugsReports == null)
+				throw new ArgumentNullException(nameof(duplicateSlugsReports));
 
 			var reportFilePath = GetReportFilePath(reportFileName, reportDirectoryName);
 			EnsureReportDirectoryExists(reportFilePath);
@@ -42,7 +42,7 @@ namespace DuplicatedSlugAnalyzer.Report
 			{
 				Formatting = Formatting.Indented
 			};
-			var json = JsonConvert.SerializeObject(duplicateSlugsInfos, settings);
+			var json = JsonConvert.SerializeObject(duplicateSlugsReports, settings);
 
 			await File.WriteAllTextAsync(reportFilePath, json).ConfigureAwait(false);
 		}

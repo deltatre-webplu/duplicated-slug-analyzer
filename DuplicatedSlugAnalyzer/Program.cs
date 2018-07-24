@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Deltatre.Utils.Extensions.Dictionary;
+using Deltatre.Utils.Extensions.Enumerable;
+using DuplicatedSlugAnalyzer.Distribution;
 using DuplicatedSlugAnalyzer.Forge;
 using DuplicatedSlugAnalyzer.Guishell;
 using DuplicatedSlugAnalyzer.Mongodb;
@@ -12,6 +12,8 @@ using Microsoft.Extensions.Configuration;
 using static System.Console;
 using static DuplicatedSlugAnalyzer.Guishell.GuishellHelpers;
 using static DuplicatedSlugAnalyzer.Report.JsonHelpers;
+using static DuplicatedSlugAnalyzer.Report.ReportHelpers;
+using static DuplicatedSlugAnalyzer.Utils.MappingHelpers;
 
 namespace DuplicatedSlugAnalyzer
 {
@@ -23,6 +25,7 @@ namespace DuplicatedSlugAnalyzer
 		private const string GuishellBaseUrlConfigKey = "guishellBaseUrl";
 		private const string ApplicationNameConfigKey = "applicationName";
 		private const string GuishellSecretConfigKey = "guishellSecret";
+		private const int BatchSize = 20;
 
 		private static void Main(string[] args)
 		{
@@ -56,6 +59,12 @@ namespace DuplicatedSlugAnalyzer
 
 			var mongodbFactory = CreateMongodbFactory(guishellAppConfiguration);
 			var duplicateSlugFinder = new DuplicateSlugsFinder(mongodbFactory.PublishedEntitiesCollection);
+			var entityCodeToDistributionCode =
+				GetEntityCodeToDistributionCodeMap(guishellAppConfiguration.CustomEntitiesConfiguration.Definitions);
+			var distributionCollectionFactory = new DistributionCollectionFactory(
+				mongodbFactory.DistributionDatabase, 
+				entityCodeToDistributionCode);
+			var publishedEntityFinder = new PublishedEntityFinder(distributionCollectionFactory);
 
 			WriteLine("\nQuerying backoffice database to get all duplicated slugs for published entities (this could take a long time)...");
 			var duplicateSlugsInfos = (await duplicateSlugFinder
@@ -63,9 +72,14 @@ namespace DuplicatedSlugAnalyzer
 				.ConfigureAwait(false)).ToArray();
 			WriteLine($"\nFound {duplicateSlugsInfos.Length} duplicated slug reservation keys.");
 
+			WriteLine($"\nCreating reports for duplicate slugs (this could take a long time)...");
+			var duplicateSlugsReports = await CreateDuplicateSlugReportsAsync(
+					duplicateSlugsInfos, 
+					publishedEntityFinder).ConfigureAwait(false);
+
 			WriteLine($"\nPreparing report '{ReportFileName}'. Report will be saved under the folder '{ReportDirectoryName}' which is located at the executable file level.");
 			await CreateJsonReportAsync(
-				duplicateSlugsInfos, 
+				duplicateSlugsReports, 
 				ReportFileName, 
 				ReportDirectoryName).ConfigureAwait(false);
 
@@ -90,23 +104,30 @@ namespace DuplicatedSlugAnalyzer
 			return new MongodbFactory(backendDbConnString, distributionDbConnString);
 		}
 
-		private static ReadOnlyDictionary<string, string> GetEntityCodeToDistributionCodeMap(
-			IEnumerable<CustomEntity> customEntities) => 
-			customEntities
-				.ToDictionary(
-					ce => ce.Code, 
-					ce => ce.DistributionCode)
-				.AsReadOnly();
-
-		private static IEnumerable<DuplicateSlugReport> MapToReports(
-			IEnumerable<DuplicateSlugInfo> infos)
+		private static async Task<IEnumerable<DuplicateSlugReport>> CreateDuplicateSlugReportsAsync(
+			IEnumerable<DuplicateSlugInfo> infos,
+			PublishedEntityFinder finder)
 		{
-			throw new NotImplementedException();
+			var result = new List<DuplicateSlugReport>();
+
+			foreach (var batch in infos.SplitInBatches(BatchSize))
+			{
+				var reports = await ProcessBatchAsync(batch, finder).ConfigureAwait(false);
+				result.AddRange(reports);
+			}
+
+			return result;
 		}
 
-		private static IEnumerable<DuplicateSlugReport> ProcessBatch(IEnumerable<DuplicateSlugInfo> batch)
+		private static async Task<IEnumerable<DuplicateSlugReport>> ProcessBatchAsync(
+			IEnumerable<DuplicateSlugInfo> batch, 
+			PublishedEntityFinder finder)
 		{
-			throw new NotImplementedException();
+			var tasks = batch
+				.Select(async info => await CreateReportAsync(info, finder).ConfigureAwait(false));
+
+			var reports = await Task.WhenAll(tasks).ConfigureAwait(false);
+			return reports;
 		}
 	}
 }
