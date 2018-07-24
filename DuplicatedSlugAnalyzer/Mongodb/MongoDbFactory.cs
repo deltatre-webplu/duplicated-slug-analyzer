@@ -4,14 +4,14 @@ using MongoDB.Driver;
 
 namespace DuplicatedSlugAnalyzer.Mongodb
 {
-	public class MongoDbFactory
+	public class MongodbFactory
 	{
 		private const string PublishedEntitiesCollectionName = "wcm.EntitiesPublished";
 
 		private readonly Lazy<IMongoCollection<BsonDocument>> _publishedEntitisCollection;
 		private readonly Lazy<IMongoDatabase> _distributionDatabase;
 
-		public MongoDbFactory(
+		public MongodbFactory(
 			string backendDbConnString, 
 			string distributionDbConnString)
 		{

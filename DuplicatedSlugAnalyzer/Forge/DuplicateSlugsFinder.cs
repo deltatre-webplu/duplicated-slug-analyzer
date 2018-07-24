@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DuplicatedSlugAnalyzer.Mongodb;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -9,24 +8,9 @@ namespace DuplicatedSlugAnalyzer.Forge
 {
 	public class DuplicateSlugsFinder
 	{
-		private const string CollectionName = "wcm.EntitiesPublished";
 		private readonly IMongoCollection<BsonDocument> _publishedEntitiesCollection;
 
-		public static DuplicateSlugsFinder Create(string connString)
-		{
-			var database = MongoDbHelpers.GetDatabaseFromConnString(connString);
-
-			var collection = database.GetCollection<BsonDocument>(
-				CollectionName, 
-				new MongoCollectionSettings
-				{
-					GuidRepresentation = GuidRepresentation.CSharpLegacy
-				});
-
-			return new DuplicateSlugsFinder(collection);
-		}
-
-		private DuplicateSlugsFinder(IMongoCollection<BsonDocument> publishedEntitiesCollection)
+		public DuplicateSlugsFinder(IMongoCollection<BsonDocument> publishedEntitiesCollection)
 		{
 			_publishedEntitiesCollection = publishedEntitiesCollection;
 		}

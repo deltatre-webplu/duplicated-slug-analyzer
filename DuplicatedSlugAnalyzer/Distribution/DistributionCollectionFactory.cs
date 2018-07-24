@@ -3,35 +3,24 @@ using System.Collections.Generic;
 using LanguageExt;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using static DuplicatedSlugAnalyzer.Mongodb.MongoDbHelpers;
 using static LanguageExt.Option<MongoDB.Driver.IMongoCollection<MongoDB.Bson.BsonDocument>>;
 
 namespace DuplicatedSlugAnalyzer.Distribution
 {
 	public class DistributionCollectionFactory
 	{
-		private readonly IMongoDatabase _database;
+		private readonly IMongoDatabase _distributionDatabase;
 		private readonly IReadOnlyDictionary<string, string> _entityCodeToDistributionCode;
 		private const string CollectionNameSeparator = "__";
 
-		public static DistributionCollectionFactory Create(
-			string connString,
+		public DistributionCollectionFactory(
+			IMongoDatabase distributionDatabase,
 			IReadOnlyDictionary<string, string> entityCodeToDistributionCode)
 		{
-			if (entityCodeToDistributionCode == null)
-				throw new ArgumentNullException(nameof(entityCodeToDistributionCode));
-
-			var database = GetDatabaseFromConnString(connString);
-
-			return new DistributionCollectionFactory(database, entityCodeToDistributionCode);
-		}
-
-		private DistributionCollectionFactory(
-			IMongoDatabase database,
-			IReadOnlyDictionary<string, string> entityCodeToDistributionCode)
-		{
-			_database = database;
-			_entityCodeToDistributionCode = entityCodeToDistributionCode;
+			_distributionDatabase = distributionDatabase 
+			                        ?? throw new ArgumentNullException(nameof(distributionDatabase));
+			_entityCodeToDistributionCode = entityCodeToDistributionCode 
+			                                ?? throw new ArgumentNullException(nameof(entityCodeToDistributionCode));
 		}
 
 		public Option<IMongoCollection<BsonDocument>> GetDistributionResourceCollection(
@@ -46,7 +35,7 @@ namespace DuplicatedSlugAnalyzer.Distribution
 
 			return collectionName.Match(
 				cn => Some(
-					_database.GetCollection<BsonDocument>(
+					_distributionDatabase.GetCollection<BsonDocument>(
 						cn, new MongoCollectionSettings
 						{
 							GuidRepresentation = GuidRepresentation.CSharpLegacy
