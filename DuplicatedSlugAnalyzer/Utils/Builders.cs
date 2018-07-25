@@ -8,6 +8,7 @@ using DuplicatedSlugAnalyzer.Guishell;
 using DuplicatedSlugAnalyzer.Mongodb;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using Serilog;
 
 namespace DuplicatedSlugAnalyzer.Utils
 {
@@ -35,6 +36,10 @@ namespace DuplicatedSlugAnalyzer.Utils
 
 			var backendDbConnString = configuration.BackEndStoreConfiguration.ConnectionString;
 			var distributionDbConnString = configuration.DistributionStoreConfiguration.ConnectionString;
+
+			Log.Debug(
+				"Creating MongodbFactory. BackendDbConnString = {BackendDbConnString}, DistributionDbConnString = {DistributionDbConnString}",
+				backendDbConnString, distributionDbConnString);
 
 			return new MongodbFactory(backendDbConnString, distributionDbConnString);
 		}

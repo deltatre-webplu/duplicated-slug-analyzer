@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using Serilog;
 
 namespace DuplicatedSlugAnalyzer.Forge
 {
@@ -18,6 +19,8 @@ namespace DuplicatedSlugAnalyzer.Forge
 
 		public async Task<IEnumerable<DuplicateSlugInfo>> GetDuplicateSlugsInfoAsync()
 		{
+			Log.Debug("Duplicate slug finder {FinderName} is ready to query backoffice database.", FinderName);
+
 			var options = new AggregateOptions
 			{
 				AllowDiskUse = true
@@ -35,6 +38,11 @@ namespace DuplicatedSlugAnalyzer.Forge
 				.ConfigureAwait(false);
 
 			var result = documents.Select(ToSlugReservationKeyInfo).ToArray();
+
+			Log.Information(
+				"Duplicate slug finder {FinderName} has found {NumDuplicates} duplicated slug reservation keys", 
+				FinderName, result.Length);
+
 			return result;
 		}
 

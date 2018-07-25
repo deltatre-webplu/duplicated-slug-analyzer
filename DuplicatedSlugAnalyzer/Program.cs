@@ -71,7 +71,7 @@ namespace DuplicatedSlugAnalyzer
 			var duplicateSlugsInfos = (await duplicateSlugFinder
 				.GetDuplicateSlugsInfoAsync()
 				.ConfigureAwait(false)).ToArray();
-			Log.Information($"Found {duplicateSlugsInfos.Length} duplicated slug reservation keys.");
+			Log.Information("Total number of duplicated slug reservation keys is {DuplicateSlugsCount}", duplicateSlugsInfos.Length);
 
 			Log.Information("Creating reports for duplicate slugs (this could take a long time)");
 			var duplicateSlugsReports = await CreateDuplicateSlugReportsAsync(
