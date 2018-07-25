@@ -2,7 +2,7 @@
 
 namespace DuplicatedSlugAnalyzer.Guishell
 {
-	public struct GuishellInfo
+	public class GuishellInfo
 	{
 		public string GuishellBaseUrl { get; }
 		public string ApplicationName { get; }
@@ -19,9 +19,9 @@ namespace DuplicatedSlugAnalyzer.Guishell
 			if (string.IsNullOrWhiteSpace(guishellSecret))
 				throw new ArgumentException("Guishell secret cannot be null or white space.", nameof(guishellSecret));
 
-			this.GuishellBaseUrl = guishellBaseUrl;
-			this.ApplicationName = applicationName;
-			this.GuishellSecret = guishellSecret;
+			GuishellBaseUrl = guishellBaseUrl;
+			ApplicationName = applicationName;
+			GuishellSecret = guishellSecret;
 		}
 	}
 }
