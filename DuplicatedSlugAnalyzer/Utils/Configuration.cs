@@ -25,5 +25,11 @@ namespace DuplicatedSlugAnalyzer.Utils
 				? defaultValueFactory()
 				: configuredValue;
 		}
+
+		public static void EnsureValidConfiguration(IConfiguration configuration)
+		{
+			if (configuration == null)
+				throw new ArgumentNullException(nameof(configuration));
+		}
 	}
 }
