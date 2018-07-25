@@ -5,12 +5,13 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using static DuplicatedSlugAnalyzer.Utils.EnvironmentHelpers;
 using static System.IO.Path;
+using static DuplicatedSlugAnalyzer.Constants;
 
 namespace DuplicatedSlugAnalyzer.Report
 {
-	public static class JsonHelpers
+	public static class JsonReport
 	{
-		public static string GetReportDirectoryPath(string reportDirectoryName)
+		public static string BuildDefaultReportDirectoryPath(string reportDirectoryName)
 		{
 			if (string.IsNullOrWhiteSpace(reportDirectoryName))
 				throw new ArgumentException($"Parameter '{nameof(reportDirectoryName)}' cannot be null or white space.", nameof(reportDirectoryName));
@@ -23,7 +24,7 @@ namespace DuplicatedSlugAnalyzer.Report
 			if (string.IsNullOrWhiteSpace(reportFileName))
 				throw new ArgumentException($"Parameter '{nameof(reportFileName)}' cannot be null or white space.", nameof(reportFileName));
 
-			return Combine(GetReportDirectoryPath(reportDirectoryName), reportFileName);
+			return Combine(BuildDefaultReportDirectoryPath(reportDirectoryName), reportFileName);
 		}
 
 		public static async Task CreateJsonReportAsync(
@@ -37,7 +38,7 @@ namespace DuplicatedSlugAnalyzer.Report
 			var reportFilePath = GetReportFilePath(reportFileName, reportDirectoryName);
 			EnsureReportDirectoryExists(reportFilePath);
 
-			var settings = new JsonSerializerSettings()
+			var settings = new JsonSerializerSettings
 			{
 				Formatting = Formatting.Indented
 			};
@@ -48,5 +49,11 @@ namespace DuplicatedSlugAnalyzer.Report
 
 		private static void EnsureReportDirectoryExists(string reportFilePath) => 
 			CreateDirectoryIfNotExisting(GetDirectoryName(reportFilePath));
+
+		public static string GetDefaultReportReportFilePath()
+		{
+			var directoryPath = BuildDefaultReportDirectoryPath(ReportDirectoryName);
+			return Combine(directoryPath, ReportFileName);
+		}
 	}
 }

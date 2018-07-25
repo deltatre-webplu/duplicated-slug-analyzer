@@ -10,7 +10,7 @@ using DuplicatedSlugAnalyzer.Report;
 using Microsoft.Extensions.Configuration;
 using static System.Console;
 using static DuplicatedSlugAnalyzer.Guishell.GuishellHelpers;
-using static DuplicatedSlugAnalyzer.Report.JsonHelpers;
+using static DuplicatedSlugAnalyzer.Report.JsonReport;
 using static DuplicatedSlugAnalyzer.Report.ReportHelpers;
 using static DuplicatedSlugAnalyzer.Constants;
 using static DuplicatedSlugAnalyzer.Utils.Builders;
