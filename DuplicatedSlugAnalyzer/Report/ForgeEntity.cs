@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace DuplicatedSlugAnalyzer.Report
 {
@@ -13,6 +14,7 @@ namespace DuplicatedSlugAnalyzer.Report
 
 		public Guid EntityId { get; }
 		public Guid TranslationId { get; }
+		[JsonProperty(PropertyName = "IsInDistribution")]
 		public bool IsPublished { get; }
 	}
 }
