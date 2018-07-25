@@ -1,16 +1,18 @@
-﻿using DuplicatedSlugAnalyzer.Forge;
+﻿using System;
 
 namespace DuplicatedSlugAnalyzer.Report
 {
 	public class ForgeEntity
 	{
-		public ForgeEntity(EntityIdentifier identifier, bool isPublished)
+		public ForgeEntity(Guid entityId, Guid translationId, bool isPublished)
 		{
-			Identifier = identifier;
+			EntityId = entityId;
+			TranslationId = translationId;
 			IsPublished = isPublished;
 		}
 
-		public EntityIdentifier Identifier { get; }
+		public Guid EntityId { get; }
+		public Guid TranslationId { get; }
 		public bool IsPublished { get; }
 	}
 }

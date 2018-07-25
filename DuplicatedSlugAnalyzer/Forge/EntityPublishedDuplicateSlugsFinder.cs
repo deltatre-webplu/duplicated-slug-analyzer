@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Bson;
@@ -6,13 +7,13 @@ using MongoDB.Driver;
 
 namespace DuplicatedSlugAnalyzer.Forge
 {
-	public class DuplicateSlugsFinder
+	public class EntityPublishedDuplicateSlugsFinder
 	{
-		private readonly IMongoCollection<BsonDocument> _publishedEntitiesCollection;
+		private readonly IMongoCollection<BsonDocument> _collection;
 
-		public DuplicateSlugsFinder(IMongoCollection<BsonDocument> publishedEntitiesCollection)
+		public EntityPublishedDuplicateSlugsFinder(IMongoCollection<BsonDocument> collection)
 		{
-			_publishedEntitiesCollection = publishedEntitiesCollection;
+			_collection = collection ?? throw new ArgumentNullException(nameof(collection));
 		}
 
 		public async Task<IEnumerable<DuplicateSlugInfo>> GetDuplicateSlugsInfoAsync()
@@ -23,11 +24,13 @@ namespace DuplicatedSlugAnalyzer.Forge
 			};
 			var groupDocument = BuildGroupDocument();
 			var matchDocument = BuildMatchDocument();
+			var projectDocument = BuildProjectDocument();
 
-			var documents = await _publishedEntitiesCollection
+			var documents = await _collection
 				.Aggregate(options)
 				.Group(groupDocument)
 				.Match(matchDocument)
+				.Project(projectDocument)
 				.ToListAsync()
 				.ConfigureAwait(false);
 
@@ -37,18 +40,23 @@ namespace DuplicatedSlugAnalyzer.Forge
 
 		private static DuplicateSlugInfo ToSlugReservationKeyInfo(BsonDocument document)
 		{
-			var numberOfEntities = document["count"].AsInt32;
-
 			var culture = document["_id"]["culture"].AsString;
 			var entityType = document["_id"]["entityType"].AsString;
 			var entityCode = document["_id"]["entityCode"].IsBsonNull ? null : document["_id"]["entityCode"].AsString;
 			var slug = document["_id"]["slug"].IsBsonNull ? null : document["_id"]["slug"].AsString;
 
-			var key = new SlugReservationKey(slug, culture, entityType, entityCode);
+			var key = new SlugReservationKey(
+				slug, 
+				culture, 
+				entityType, 
+				entityCode);
 
-			var identifiers = document["identifiers"].AsBsonArray.Select(d => ToEntityIdentifier(d.AsBsonDocument)).ToArray();
+			var identifiers = document["identifiers"]
+				.AsBsonArray
+				.Select(d => ToEntityIdentifier(d.AsBsonDocument))
+				.ToHashSet();
 
-			return new DuplicateSlugInfo(key, numberOfEntities, identifiers);
+			return new DuplicateSlugInfo(key, identifiers);
 		}
 
 		private static EntityIdentifier ToEntityIdentifier(BsonValue document)
@@ -79,7 +87,7 @@ namespace DuplicatedSlugAnalyzer.Forge
 			{
 				["$addToSet"] = entityIdentifierDocument
 			};
-			
+
 			var groupDocument = new BsonDocument
 			{
 				["_id"] = idDocument,
@@ -101,6 +109,15 @@ namespace DuplicatedSlugAnalyzer.Forge
 				["count"] = countDocument
 			};
 			return matchDocument;
+		}
+
+		private static BsonDocument BuildProjectDocument()
+		{
+			var document = new BsonDocument
+			{
+				["identifiers"] = 1
+			};
+			return document;
 		}
 	}
 }

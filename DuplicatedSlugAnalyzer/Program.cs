@@ -50,7 +50,7 @@ namespace DuplicatedSlugAnalyzer
 				.ConfigureAwait(false);
 
 			var mongodbFactory = CreateMongodbFactory(guishellAppConfiguration);
-			var duplicateSlugFinder = new DuplicateSlugsFinder(mongodbFactory.PublishedEntitiesCollection);
+			var duplicateSlugFinder = new EntityPublishedDuplicateSlugsFinder(mongodbFactory.PublishedEntitiesCollection);
 			var publishedEntityFinder = CreatePublishedEntityFinder(
 				mongodbFactory.DistributionDatabase, 
 				guishellAppConfiguration);

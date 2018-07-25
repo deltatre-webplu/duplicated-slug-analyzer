@@ -25,12 +25,14 @@ namespace DuplicatedSlugAnalyzer.Report
 			return publishedEntityIdentifier.Match(
 				identifier =>
 					{
-						Func<EntityIdentifier, ForgeEntity> projector = x => new ForgeEntity(x, x == identifier);
+						Func<EntityIdentifier, ForgeEntity> projector = x => 
+							new ForgeEntity(x.EntityId, x.TranslationId, x == identifier);
 						return ToReport(info, projector);
 					},
 				() =>
 					{
-						Func<EntityIdentifier, ForgeEntity> projector = x => new ForgeEntity(x, false);
+						Func<EntityIdentifier, ForgeEntity> projector = x => 
+							new ForgeEntity(x.EntityId, x.TranslationId, false);
 						return ToReport(info, projector);
 					}
 			);
@@ -40,8 +42,8 @@ namespace DuplicatedSlugAnalyzer.Report
 			DuplicateSlugInfo info, 
 			Func<EntityIdentifier, ForgeEntity> projector)
 		{
-			var forgeEntities = info.EntityIdentifiers.Select(projector).ToArray();
-			return new DuplicateSlugReport(info.Key, info.NumberOfEntities, forgeEntities);
+			var forgeEntities = info.EntityIdentifiers.Select(projector).ToHashSet();
+			return new DuplicateSlugReport(info.Key, forgeEntities);
 		}
 	}
 }
