@@ -30,5 +30,4 @@ Here is an example of JSON configuration file containing dummy data:
 	"reportDirectoryPath": "C:\\Temp\\duplicate-slug-analyzer\\Reports",
 	"logsDirectoryPath": "C:\\Temp\\duplicate-slug-analyzer\\Logs"
 }
-
 ```
