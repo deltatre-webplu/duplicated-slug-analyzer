@@ -1,6 +1,8 @@
 ﻿using System;
 using Serilog;
 using Serilog.Events;
+using Serilog.Formatting.Display;
+using Serilog.Formatting.Json;
 using static DuplicatedSlugAnalyzer.Constants;
 using static System.IO.Path;
 using static DuplicatedSlugAnalyzer.Utils.EnvironmentHelpers;
@@ -18,7 +20,7 @@ namespace DuplicatedSlugAnalyzer.Logging
 
 			var logger = new LoggerConfiguration()
 				.MinimumLevel.Debug()
-				.WriteTo.File(logFilePath, rollingInterval: RollingInterval.Day)
+				.WriteTo.File(new JsonFormatter(), logFilePath, rollingInterval: RollingInterval.Day)
 				.WriteTo.Console(LogEventLevel.Information)
 				.CreateLogger();
 

@@ -37,9 +37,8 @@ namespace DuplicatedSlugAnalyzer.Utils
 			var backendDbConnString = configuration.BackEndStoreConfiguration.ConnectionString;
 			var distributionDbConnString = configuration.DistributionStoreConfiguration.ConnectionString;
 
-			Log.Debug(
-				"Creating MongodbFactory. BackendDbConnString = {BackendDbConnString}, DistributionDbConnString = {DistributionDbConnString}",
-				backendDbConnString, distributionDbConnString);
+			Log.Debug("Backend database connection string is {BackendDbConnString}", backendDbConnString);
+			Log.Debug("Distribution database connection string is {DistributionDbConnString}", distributionDbConnString);
 
 			return new MongodbFactory(backendDbConnString, distributionDbConnString);
 		}

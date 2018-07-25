@@ -17,16 +17,18 @@ namespace DuplicatedSlugAnalyzer.Guishell
 			if (info == null)
 				throw new ArgumentNullException(nameof(info));
 
+			var guishellBaseUrl = info.GuishellBaseUrl;
+			var applicationName = info.ApplicationName;
+			var secret = info.GuishellSecret;
 			Log.Debug(
-				"Guishell base URL = {GuishellBaseUrl}, Guishell app name = {AppName}, Guishell secret = {GuishellSecret}",
-				info.GuishellBaseUrl, info.ApplicationName, info.GuishellSecret);
+				"Calling Guishell. Guishell base url {GuishellBaseUrl}. Application name {ApplicationName}. Secret {Secret}", 
+				guishellBaseUrl, applicationName, secret);
 
-			var uri = BuildAppConfigurationUri(info.GuishellBaseUrl, info.ApplicationName);
-			var authorizationHeaderValue = BuildAuthorizationHeaderValue(info.GuishellSecret);
+			var uri = BuildAppConfigurationUri(guishellBaseUrl, applicationName);
+			var authorizationHeaderValue = BuildAuthorizationHeaderValue(secret);
 
-			Log.Debug(
-				"Ready to call Guishell. Url = {Url}, Authorization header = {AuthorizationHeader}",
-				uri, authorizationHeaderValue);
+			Log.Debug("Composed Guishell admin api endpoint is {Uri}", uri);
+			Log.Debug("Composed Guishell admin api authorization header is {AuthorizationHeaderValue}", authorizationHeaderValue);
 
 			using (var client = new HttpClient())
 			{

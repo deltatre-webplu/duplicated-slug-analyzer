@@ -19,8 +19,9 @@ namespace DuplicatedSlugAnalyzer.Forge
 
 		public async Task<IEnumerable<DuplicateSlugInfo>> GetDuplicateSlugsInfoAsync()
 		{
-			Log.Information(
-				"Duplicate slug finder {FinderName} is querying backoffice database (this could take a long time)", FinderName);
+			var finderName = FinderName;
+
+			Log.Information("Duplicate slug finder {FinderName} is querying backoffice database (this could take a long time)", finderName);
 
 			var options = new AggregateOptions
 			{
@@ -41,8 +42,8 @@ namespace DuplicatedSlugAnalyzer.Forge
 			var result = documents.Select(ToSlugReservationKeyInfo).ToArray();
 
 			Log.Information(
-				"Duplicate slug finder {FinderName} has found {NumDuplicates} duplicated slug reservation keys", 
-				FinderName, result.Length);
+				"Duplicate slug finder {FinderName} has found {NumDuplicates} duplicated slug reservation keys",
+				finderName, result.Length);
 
 			return result;
 		}

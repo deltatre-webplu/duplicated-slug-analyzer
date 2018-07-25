@@ -46,7 +46,7 @@ namespace DuplicatedSlugAnalyzer
 			ReadLine();
 		}
 
-		private static async Task RunAsync(IConfiguration config)
+		private static async Task RunAsync(IConfiguration config) 
 		{
 			WriteLine("Welcome to Webplu Duplicate Slugs Analyzer. Press enter to start.");
 			ReadLine();
