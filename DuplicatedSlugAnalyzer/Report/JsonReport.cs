@@ -11,32 +11,17 @@ namespace DuplicatedSlugAnalyzer.Report
 {
 	public static class JsonReport
 	{
-		public static string BuildDefaultReportDirectoryPath(string reportDirectoryName)
-		{
-			if (string.IsNullOrWhiteSpace(reportDirectoryName))
-				throw new ArgumentException($"Parameter '{nameof(reportDirectoryName)}' cannot be null or white space.", nameof(reportDirectoryName));
-
-			return Combine(GetRunningAssemblyDirectoryPath(), reportDirectoryName);
-		}
-
-		public static string GetReportFilePath(string reportFileName, string reportDirectoryName)
-		{
-			if (string.IsNullOrWhiteSpace(reportFileName))
-				throw new ArgumentException($"Parameter '{nameof(reportFileName)}' cannot be null or white space.", nameof(reportFileName));
-
-			return Combine(BuildDefaultReportDirectoryPath(reportDirectoryName), reportFileName);
-		}
-
 		public static async Task CreateJsonReportAsync(
-			IEnumerable<DuplicateSlugReport> duplicateSlugsReports, 
-			string reportFileName, 
-			string reportDirectoryName)
+			IEnumerable<DuplicateSlugReport> duplicateSlugsReports,
+			string reportDirectoryPath)
 		{
 			if (duplicateSlugsReports == null)
 				throw new ArgumentNullException(nameof(duplicateSlugsReports));
 
-			var reportFilePath = GetReportFilePath(reportFileName, reportDirectoryName);
-			EnsureReportDirectoryExists(reportFilePath);
+			if (string.IsNullOrWhiteSpace(reportDirectoryPath))
+				throw new ArgumentException("Report directory path cannot be null or white space.", nameof(reportDirectoryPath));
+
+			CreateDirectoryIfNotExisting(reportDirectoryPath);
 
 			var settings = new JsonSerializerSettings
 			{
@@ -44,16 +29,14 @@ namespace DuplicatedSlugAnalyzer.Report
 			};
 			var json = JsonConvert.SerializeObject(duplicateSlugsReports, settings);
 
+			var reportFilePath = Combine(reportDirectoryPath, ReportFileName);
 			await File.WriteAllTextAsync(reportFilePath, json).ConfigureAwait(false);
 		}
 
-		private static void EnsureReportDirectoryExists(string reportFilePath) => 
-			CreateDirectoryIfNotExisting(GetDirectoryName(reportFilePath));
-
-		public static string GetDefaultReportReportFilePath()
+		public static string GetDefaultReportDirectoryPath()
 		{
-			var directoryPath = BuildDefaultReportDirectoryPath(ReportDirectoryName);
-			return Combine(directoryPath, ReportFileName);
+			var runningAssemblyDirectoryPath = GetRunningAssemblyDirectoryPath();
+			return Combine(runningAssemblyDirectoryPath, DefaultReportDirectoryName);
 		}
 	}
 }

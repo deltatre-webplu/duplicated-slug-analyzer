@@ -66,11 +66,11 @@ namespace DuplicatedSlugAnalyzer
 					duplicateSlugsInfos, 
 					publishedEntityFinder).ConfigureAwait(false);
 
-			WriteLine($"\nPreparing report '{ReportFileName}'. Report will be saved under the folder '{ReportDirectoryName}' which is located at the executable file level.");
+			var reportDirectoryPath = GetJsonReportDirectoryPath(config);
+			WriteLine($"\nWriting report '{ReportFileName}' under folder '{reportDirectoryPath}'...");
 			await CreateJsonReportAsync(
 				duplicateSlugsReports, 
-				ReportFileName, 
-				ReportDirectoryName).ConfigureAwait(false);
+				reportDirectoryPath).ConfigureAwait(false);
 
 			WriteLine("\nExecution successfully completed. Press enter to close.");
 		}
@@ -110,6 +110,14 @@ namespace DuplicatedSlugAnalyzer
 
 			var reports = await Task.WhenAll(tasks).ConfigureAwait(false);
 			return reports;
+		}
+
+		private static string GetJsonReportDirectoryPath(IConfiguration configuration)
+		{
+			var configuredReportDirectoryPath = configuration[ReportDirectoryPathConfigKey];
+			return string.IsNullOrWhiteSpace(configuredReportDirectoryPath)
+				? GetDefaultReportDirectoryPath()
+				: configuredReportDirectoryPath;
 		}
 	}
 }
