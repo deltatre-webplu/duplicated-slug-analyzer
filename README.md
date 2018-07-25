@@ -4,7 +4,7 @@ This is a simple console app to get a feedback about duplicated slug inside your
 
 ## Configuration
 
-There are 3 mandatory configurations (**if you don't provide these settings the application will exit doing nothing**) 
+There are 3 mandatory configurations (**if you don't provide these settings the application will exit doing nothing**): 
  - *guishellBaseUrl*: the base URL of your Guishell installation
  - *applicationName*: the name of Forge application registered under Guishell
  - *guishellSecret*: the secret to be used to call Guishell admin API
