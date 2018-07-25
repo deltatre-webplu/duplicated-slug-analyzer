@@ -8,12 +8,15 @@ using DuplicatedSlugAnalyzer.Forge;
 using DuplicatedSlugAnalyzer.Guishell;
 using DuplicatedSlugAnalyzer.Report;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 using static System.Console;
 using static DuplicatedSlugAnalyzer.Guishell.GuishellHelpers;
 using static DuplicatedSlugAnalyzer.Report.JsonReport;
 using static DuplicatedSlugAnalyzer.Report.ReportHelpers;
 using static DuplicatedSlugAnalyzer.Constants;
 using static DuplicatedSlugAnalyzer.Utils.Builders;
+using static DuplicatedSlugAnalyzer.Logging.Serilog;
+using static DuplicatedSlugAnalyzer.Utils.Configuration;
 
 namespace DuplicatedSlugAnalyzer
 {
@@ -21,30 +24,39 @@ namespace DuplicatedSlugAnalyzer
 	{
 		private static void Main(string[] args)
 		{
+			var config = GetConfiguration(args);
+
+			BootstrapLogger(config);
+
+			Log.Debug("Start processing");
+
 			try
 			{
-				RunAsync(args).Wait();
+				RunAsync(config).Wait();
 			}
-			catch (Exception e)
+			catch (Exception ex)
 			{
-				WriteLine(e);
+				Log.Error(ex, "An error occurred");
 			}
+
+			Log.Debug("End processing");
+
+			Log.CloseAndFlush();
 
 			ReadLine();
 		}
 
-		private static async Task RunAsync(string[] args)
+		private static async Task RunAsync(IConfiguration config)
 		{
 			WriteLine("Welcome to Webplu Duplicate Slugs Analyzer. Press enter to start.");
 			ReadLine();
 
-			WriteLine("\nReading configuration to get guishell info...");
-			var config = GetConfiguration(args);
+			Log.Information("Reading configuration to get guishell info");
 			var guishellBaseUrl = config[GuishellBaseUrlConfigKey];
 			var applicationName = config[ApplicationNameConfigKey];
 			var guishellSecret = config[GuishellSecretConfigKey];
 
-			WriteLine("\nCalling guishell to get Forge configuration...");
+			Log.Information("Calling guishell to get Forge configuration");
 			var guishellInfo = new GuishellInfo(guishellBaseUrl, applicationName, guishellSecret);
 			var guishellAppConfiguration = await GetGuishellAppConfigurationAsync(guishellInfo)
 				.ConfigureAwait(false);
@@ -55,19 +67,19 @@ namespace DuplicatedSlugAnalyzer
 				mongodbFactory.DistributionDatabase, 
 				guishellAppConfiguration);
 
-			WriteLine("\nQuerying backoffice database to get all duplicated slugs for published entities (this could take a long time)...");
+			Log.Information("Querying backoffice database to get duplicated slugs (this could take a long time)");
 			var duplicateSlugsInfos = (await duplicateSlugFinder
 				.GetDuplicateSlugsInfoAsync()
 				.ConfigureAwait(false)).ToArray();
-			WriteLine($"\nFound {duplicateSlugsInfos.Length} duplicated slug reservation keys.");
+			Log.Information($"Found {duplicateSlugsInfos.Length} duplicated slug reservation keys.");
 
-			WriteLine($"\nCreating reports for duplicate slugs (this could take a long time)...");
+			Log.Information("Creating reports for duplicate slugs (this could take a long time)");
 			var duplicateSlugsReports = await CreateDuplicateSlugReportsAsync(
 					duplicateSlugsInfos, 
 					publishedEntityFinder).ConfigureAwait(false);
 
 			var reportDirectoryPath = GetJsonReportDirectoryPath(config);
-			WriteLine($"\nWriting report '{ReportFileName}' under folder '{reportDirectoryPath}'...");
+			Log.Information($"Writing report '{ReportFileName}' under folder '{reportDirectoryPath}'");
 			await CreateJsonReportAsync(
 				duplicateSlugsReports, 
 				reportDirectoryPath).ConfigureAwait(false);
@@ -84,6 +96,12 @@ namespace DuplicatedSlugAnalyzer
 				.Build();
 
 			return config;
+		}
+
+		private static void BootstrapLogger(IConfiguration configuration)
+		{
+			var logsDirectoryPath = GetLogsDirectoryPath(configuration);
+			Log.Logger = CreateLogger(logsDirectoryPath);
 		}
 
 		private static async Task<IEnumerable<DuplicateSlugReport>> CreateDuplicateSlugReportsAsync(
@@ -112,12 +130,10 @@ namespace DuplicatedSlugAnalyzer
 			return reports;
 		}
 
-		private static string GetJsonReportDirectoryPath(IConfiguration configuration)
-		{
-			var configuredReportDirectoryPath = configuration[ReportDirectoryPathConfigKey];
-			return string.IsNullOrWhiteSpace(configuredReportDirectoryPath)
-				? GetDefaultReportDirectoryPath()
-				: configuredReportDirectoryPath;
-		}
+		private static string GetJsonReportDirectoryPath(IConfiguration configuration) =>
+			ReadSettingFromConfiguration(configuration, ReportDirectoryPathConfigKey, GetDefaultReportDirectoryPath);
+
+		private static string GetLogsDirectoryPath(IConfiguration configuration) =>
+			ReadSettingFromConfiguration(configuration, LogsDirectoryPathConfigKey, GetDefaultLogsDirectoryPath);
 	}
 }
