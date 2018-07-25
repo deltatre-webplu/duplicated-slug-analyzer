@@ -67,11 +67,11 @@ namespace DuplicatedSlugAnalyzer
 				mongodbFactory.DistributionDatabase, 
 				guishellAppConfiguration);
 
-			Log.Information("Querying backoffice database to get duplicated slugs (this could take a long time)");
 			var duplicateSlugsInfos = (await duplicateSlugFinder
 				.GetDuplicateSlugsInfoAsync()
 				.ConfigureAwait(false)).ToArray();
-			Log.Information("Total number of duplicated slug reservation keys is {DuplicateSlugsCount}", duplicateSlugsInfos.Length);
+			Log.Information(
+				"Total number of duplicated slug reservation keys is {DuplicateSlugsCount}", duplicateSlugsInfos.Length);
 
 			var duplicateSlugsReports = await CreateDuplicateSlugReportsAsync(
 					duplicateSlugsInfos, 
@@ -110,15 +110,15 @@ namespace DuplicatedSlugAnalyzer
 			var batches = infos.SplitInBatches(BatchSize).ToArray();
 
 			Log.Information(
-				"Ready to query Distribution database. Number of batches to be processed is {NumBatches} (this could take a long time)", 
+				"Querying distribution database. Number of batches to be processed is {NumBatches}", 
 				batches.Length);
 
 			for (var index = 0; index < batches.Length; index++)
 			{
 				if(index == 0 || (index + 1) % 10 == 0 || index == batches.Length - 1)
-					Log.Information("Processing batch number {BatchNumber}", index + 1);
+					Log.Information("Processing batch number {BatchNumber}  (this could take a long time)", index + 1);
 				else
-					Log.Debug("Processing batch number {BatchNumber}", index + 1);
+					Log.Debug("Processing batch number {BatchNumber}  (this could take a long time)", index + 1);
 
 				var batch = batches[index];
 				var reports = await ProcessBatchAsync(batch, finder).ConfigureAwait(false);

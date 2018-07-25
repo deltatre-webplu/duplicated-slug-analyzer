@@ -35,7 +35,7 @@ namespace DuplicatedSlugAnalyzer.Report
 			var reportFilePath = Combine(reportDirectoryPath, ReportFileName);
 			await File.WriteAllTextAsync(reportFilePath, json).ConfigureAwait(false);
 
-			Log.Debug("Successfully written JSON report file");
+			Log.Information("Successfully written JSON report file");
 		}
 
 		public static string GetDefaultReportDirectoryPath()

@@ -19,7 +19,8 @@ namespace DuplicatedSlugAnalyzer.Forge
 
 		public async Task<IEnumerable<DuplicateSlugInfo>> GetDuplicateSlugsInfoAsync()
 		{
-			Log.Debug("Duplicate slug finder {FinderName} is ready to query backoffice database.", FinderName);
+			Log.Information(
+				"Duplicate slug finder {FinderName} is querying backoffice database (this could take a long time)", FinderName);
 
 			var options = new AggregateOptions
 			{
