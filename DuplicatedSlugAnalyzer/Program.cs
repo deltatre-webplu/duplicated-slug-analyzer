@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Threading.Tasks; 
 using Deltatre.Utils.Extensions.Enumerable;
 using DuplicatedSlugAnalyzer.Distribution;
 using DuplicatedSlugAnalyzer.Forge;
@@ -50,7 +50,7 @@ namespace DuplicatedSlugAnalyzer
 				.ConfigureAwait(false);
 
 			var mongodbFactory = CreateMongodbFactory(guishellAppConfiguration);
-			var duplicateSlugFinder = new EntityPublishedDuplicateSlugsFinder(mongodbFactory.PublishedEntitiesCollection);
+			var duplicateSlugFinder = CreateDuplicateSlugFinder(mongodbFactory.BackendDatabase);
 			var publishedEntityFinder = CreatePublishedEntityFinder(
 				mongodbFactory.DistributionDatabase, 
 				guishellAppConfiguration);

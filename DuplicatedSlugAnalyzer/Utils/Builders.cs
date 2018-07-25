@@ -3,14 +3,25 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Deltatre.Utils.Extensions.Dictionary;
 using DuplicatedSlugAnalyzer.Distribution;
+using DuplicatedSlugAnalyzer.Forge;
 using DuplicatedSlugAnalyzer.Guishell;
 using DuplicatedSlugAnalyzer.Mongodb;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace DuplicatedSlugAnalyzer.Utils
 {
 	public static class Builders
 	{
+		private const string EntitiesPublishedCollectionName = "wcm.EntitiesPublished";
+		private const string AlbumsPublishedCollectionName = "wcm.AlbumsPublished";
+		private const string CustomEntitiesPublishedCollectionName = "wcm.CustomEntitiesPublished";
+		private const string DocumentsPublishedCollectionName = "wcm.DocumentsPublished";
+		private const string PhotosPublishedCollectionName = "wcm.PhotosPublished";
+		private const string SelectionsPublishedCollectionName = "wcm.SelectionsPublished";
+		private const string StoriesPublishedCollectionName = "wcm.StoriesPublished";
+		private const string TagsPublishedCollectionName = "wcm.TagsPublished";
+
 		public static MongodbFactory CreateMongodbFactory(ApplicationConfiguration configuration)
 		{
 			if (configuration == null)
@@ -61,6 +72,32 @@ namespace DuplicatedSlugAnalyzer.Utils
 			var publishedEntityFinder = new PublishedEntityFinder(cachedFactory);
 
 			return publishedEntityFinder;
+		}
+
+		public static DuplicateSlugFinder CreateDuplicateSlugFinder(IMongoDatabase backofficeDatabase)
+		{
+			var entitiesPublishedColl = backofficeDatabase.GetCollection<BsonDocument>(EntitiesPublishedCollectionName);
+			var albumsPublishedColl = backofficeDatabase.GetCollection<BsonDocument>(AlbumsPublishedCollectionName);
+			var customEntitiesPublishedColl = backofficeDatabase.GetCollection<BsonDocument>(CustomEntitiesPublishedCollectionName);
+			var documentsPublishedColl = backofficeDatabase.GetCollection<BsonDocument>(DocumentsPublishedCollectionName);
+			var photosPublishedColl = backofficeDatabase.GetCollection<BsonDocument>(PhotosPublishedCollectionName);
+			var selectionsPublishedColl = backofficeDatabase.GetCollection<BsonDocument>(SelectionsPublishedCollectionName);
+			var storiesPublishedColl = backofficeDatabase.GetCollection<BsonDocument>(StoriesPublishedCollectionName);
+			var tagsPublishedColl = backofficeDatabase.GetCollection<BsonDocument>(TagsPublishedCollectionName);
+
+			var finders = new BaseDuplicateSlugFinder[]
+			{
+				new EntityPublishedDuplicateSlugsFinder(entitiesPublishedColl),
+				new BuiltInEntityDuplicateSlugFinder(albumsPublishedColl, "album"),
+				new BuiltInEntityDuplicateSlugFinder(documentsPublishedColl, "document"),
+				new BuiltInEntityDuplicateSlugFinder(photosPublishedColl, "photo"),
+				new BuiltInEntityDuplicateSlugFinder(selectionsPublishedColl, "selection"),
+				new BuiltInEntityDuplicateSlugFinder(storiesPublishedColl, "story"),
+				new BuiltInEntityDuplicateSlugFinder(tagsPublishedColl, "tag"),
+				new CustomEntityDuplicateSlugFinder(customEntitiesPublishedColl) 
+			};
+
+			return new DuplicateSlugFinder(finders);
 		}
 	}
 }

@@ -115,5 +115,7 @@ namespace DuplicatedSlugAnalyzer.Forge
 		}
 
 		protected abstract BsonDocument BuildGroupIdDocument();
+
+		public abstract string FinderName { get; }
 	}
 }

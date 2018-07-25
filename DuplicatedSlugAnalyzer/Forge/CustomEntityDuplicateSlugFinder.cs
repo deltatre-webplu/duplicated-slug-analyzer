@@ -20,5 +20,7 @@ namespace DuplicatedSlugAnalyzer.Forge
 			};
 			return document;
 		}
+
+		public override string FinderName => "customentity";
 	}
 }
