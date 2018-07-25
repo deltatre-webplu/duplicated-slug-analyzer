@@ -51,11 +51,9 @@ namespace DuplicatedSlugAnalyzer
 
 			var mongodbFactory = CreateMongodbFactory(guishellAppConfiguration);
 			var duplicateSlugFinder = new DuplicateSlugsFinder(mongodbFactory.PublishedEntitiesCollection);
-			var factory = new DistributionCollectionFactory(
-				mongodbFactory.DistributionDatabase,
-				CreateEntityCodeToDistributionCodeMap(guishellAppConfiguration));
-			var cachedFactory = new CachedDistributionCollectionFactory(factory);
-			var publishedEntityFinder = new PublishedEntityFinder(cachedFactory);
+			var publishedEntityFinder = CreatePublishedEntityFinder(
+				mongodbFactory.DistributionDatabase, 
+				guishellAppConfiguration);
 
 			WriteLine("\nQuerying backoffice database to get all duplicated slugs for published entities (this could take a long time)...");
 			var duplicateSlugsInfos = (await duplicateSlugFinder

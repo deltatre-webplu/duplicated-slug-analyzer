@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Deltatre.Utils.Extensions.Dictionary;
+using DuplicatedSlugAnalyzer.Distribution;
 using DuplicatedSlugAnalyzer.Guishell;
 using DuplicatedSlugAnalyzer.Mongodb;
+using MongoDB.Driver;
 
 namespace DuplicatedSlugAnalyzer.Utils
 {
@@ -44,6 +45,22 @@ namespace DuplicatedSlugAnalyzer.Utils
 					ce => ce.Code,
 					ce => ce.DistributionCode)
 				.AsReadOnly();
+		}
+
+		public static PublishedEntityFinder CreatePublishedEntityFinder(
+			IMongoDatabase distributionDatabase, 
+			ApplicationConfiguration configuration)
+		{
+			if (distributionDatabase == null)
+				throw new ArgumentNullException(nameof(distributionDatabase));
+
+			var entityCodeToDistributionCodeMap = CreateEntityCodeToDistributionCodeMap(configuration);
+
+			var factory = new DistributionCollectionFactory(distributionDatabase, entityCodeToDistributionCodeMap);
+			var cachedFactory = new CachedDistributionCollectionFactory(factory);
+			var publishedEntityFinder = new PublishedEntityFinder(cachedFactory);
+
+			return publishedEntityFinder;
 		}
 	}
 }
