@@ -2,6 +2,10 @@
 
 This is a simple console app to get a feedback about duplicated slug inside your system.
 
+Given the guishell base URL, the name of the Forge application registered under guishell and the secret to call the guishell admin API, this application will check your backoffice and distribution databases and will produce a JSON report with the duplicated slug reservation keys found.
+
+**NOTE**: we consider a *SlugReservationKey* to be a key composed by *Slug*, *EntityType*, *EntityCode* and *Culture*. 
+
 ## Configuration
 
 There are 3 mandatory configurations (**if you don't provide these settings the application will exit doing nothing**): 
