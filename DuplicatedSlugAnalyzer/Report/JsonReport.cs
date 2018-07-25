@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Serilog;
 using static DuplicatedSlugAnalyzer.Utils.EnvironmentHelpers;
 using static System.IO.Path;
 using static DuplicatedSlugAnalyzer.Constants;
@@ -21,6 +22,8 @@ namespace DuplicatedSlugAnalyzer.Report
 			if (string.IsNullOrWhiteSpace(reportDirectoryPath))
 				throw new ArgumentException("Report directory path cannot be null or white space.", nameof(reportDirectoryPath));
 
+			Log.Information("Writing report {ReportFileName} under folder {ReportDirectoryPath}", ReportFileName, reportDirectoryPath);
+
 			CreateDirectoryIfNotExisting(reportDirectoryPath);
 
 			var settings = new JsonSerializerSettings
@@ -31,6 +34,8 @@ namespace DuplicatedSlugAnalyzer.Report
 
 			var reportFilePath = Combine(reportDirectoryPath, ReportFileName);
 			await File.WriteAllTextAsync(reportFilePath, json).ConfigureAwait(false);
+
+			Log.Debug("Successfully written JSON report file");
 		}
 
 		public static string GetDefaultReportDirectoryPath()

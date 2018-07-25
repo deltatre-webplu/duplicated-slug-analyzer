@@ -73,13 +73,11 @@ namespace DuplicatedSlugAnalyzer
 				.ConfigureAwait(false)).ToArray();
 			Log.Information("Total number of duplicated slug reservation keys is {DuplicateSlugsCount}", duplicateSlugsInfos.Length);
 
-			Log.Information("Creating reports for duplicate slugs (this could take a long time)");
 			var duplicateSlugsReports = await CreateDuplicateSlugReportsAsync(
 					duplicateSlugsInfos, 
 					publishedEntityFinder).ConfigureAwait(false);
 
 			var reportDirectoryPath = GetJsonReportDirectoryPath(config);
-			Log.Information($"Writing report '{ReportFileName}' under folder '{reportDirectoryPath}'");
 			await CreateJsonReportAsync(
 				duplicateSlugsReports, 
 				reportDirectoryPath).ConfigureAwait(false);
@@ -108,15 +106,25 @@ namespace DuplicatedSlugAnalyzer
 			IEnumerable<DuplicateSlugInfo> infos,
 			PublishedEntityFinder finder)
 		{
-			var result = new List<DuplicateSlugReport>();
+			var results = new List<DuplicateSlugReport>();
+			var batches = infos.SplitInBatches(BatchSize).ToArray();
 
-			foreach (var batch in infos.SplitInBatches(BatchSize))
+			Log.Information(
+				"Ready to query Distribution database. Number of batches to be processed = {NumBatches} (this could take a long time)", 
+				batches.Length);
+
+			for (var index = 0; index < batches.Length; index++)
 			{
+				Log.Debug("Processing batch number {BatchNumber}", index + 1);
+
+				var batch = batches[index];
 				var reports = await ProcessBatchAsync(batch, finder).ConfigureAwait(false);
-				result.AddRange(reports);
+				results.AddRange(reports);
 			}
 
-			return result;
+			Log.Debug("Completed processing of batches. Duplicate slug reports created.");
+
+			return results;
 		}
 
 		private static async Task<IEnumerable<DuplicateSlugReport>> ProcessBatchAsync(
