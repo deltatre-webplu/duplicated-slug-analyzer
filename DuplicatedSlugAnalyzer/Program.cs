@@ -110,12 +110,15 @@ namespace DuplicatedSlugAnalyzer
 			var batches = infos.SplitInBatches(BatchSize).ToArray();
 
 			Log.Information(
-				"Ready to query Distribution database. Number of batches to be processed = {NumBatches} (this could take a long time)", 
+				"Ready to query Distribution database. Number of batches to be processed is {NumBatches} (this could take a long time)", 
 				batches.Length);
 
 			for (var index = 0; index < batches.Length; index++)
 			{
-				Log.Debug("Processing batch number {BatchNumber}", index + 1);
+				if(index == 0 || (index + 1) % 10 == 0 || index == batches.Length - 1)
+					Log.Information("Processing batch number {BatchNumber}", index + 1);
+				else
+					Log.Debug("Processing batch number {BatchNumber}", index + 1);
 
 				var batch = batches[index];
 				var reports = await ProcessBatchAsync(batch, finder).ConfigureAwait(false);
