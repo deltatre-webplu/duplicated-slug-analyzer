@@ -35,3 +35,10 @@ Here is an example of JSON configuration file containing dummy data:
 	"logsDirectoryPath": "C:\\Temp\\duplicate-slug-analyzer\\Logs"
 }
 ```
+
+## Invoke from command line
+
+To invoke the application from command line and pass command line arguments, type the following command in your command line:
+```
+DuplicatedSlugAnalyzer.exe --guishellBaseUrl="YOUR GUISHELL BASE URL" --applicationName="NAME OF FORGE APPLICATION REGISTERED UNDER GUISHELL" --guishellSecret="YOUR GUISHELLL ADMIN API SECRET"
+```
