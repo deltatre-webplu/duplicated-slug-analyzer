@@ -1,5 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
+using Serilog;
+using static DuplicatedSlugAnalyzer.Constants;
 
 namespace DuplicatedSlugAnalyzer.Utils
 {
@@ -26,10 +28,32 @@ namespace DuplicatedSlugAnalyzer.Utils
 				: configuredValue;
 		}
 
-		public static void EnsureValidConfiguration(IConfiguration configuration)
+		public static bool IsValidConfiguration(IConfiguration configuration)
 		{
 			if (configuration == null)
 				throw new ArgumentNullException(nameof(configuration));
+
+			return
+				HasConfiguration(configuration, GuishellBaseUrlConfigKey,
+					() => LogErrorForMissingConfiguration(GuishellBaseUrlConfigKey))
+				&&
+				HasConfiguration(configuration, ApplicationNameConfigKey,
+					() => LogErrorForMissingConfiguration(ApplicationNameConfigKey))
+				&&
+				HasConfiguration(configuration, GuishellSecretConfigKey,
+					() => LogErrorForMissingConfiguration(GuishellSecretConfigKey));
 		}
+
+		private static bool HasConfiguration(IConfiguration configuration, string key, Action missingConfigurationCallback)
+		{
+			var hasConfiguration = !string.IsNullOrWhiteSpace(configuration[key]);
+			if (!hasConfiguration)
+				missingConfigurationCallback();
+
+			return hasConfiguration;
+		}
+
+		private static void LogErrorForMissingConfiguration(string configKey) => 
+			Log.Error("Configuration {ConfigKey} is mandatory. Cannot proceed.", configKey);
 	}
 }

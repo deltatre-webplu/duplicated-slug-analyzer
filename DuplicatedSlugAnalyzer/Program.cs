@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Generic; 
 using System.Linq;
 using System.Threading.Tasks; 
 using Deltatre.Utils.Extensions.Enumerable;
@@ -48,6 +48,12 @@ namespace DuplicatedSlugAnalyzer
 
 		private static async Task RunAsync(IConfiguration config) 
 		{
+			if (!IsValidConfiguration(config))
+			{
+				WriteLine("\nPress enter to close.");
+				return;
+			}
+
 			WriteLine("Welcome to Webplu Duplicate Slugs Analyzer. Press enter to start.");
 			ReadLine();
 
