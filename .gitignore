@@ -193,3 +193,4 @@ ModelManifest.xml
 
 # Settings
 appsettings.json
+/DuplicatedSlugAnalyzer/Properties/launchSettings.json
